@@ -1,4 +1,4 @@
-# osrf_jenkins
+# osrf_jenkins_agent
 
-TODO: Enter the cookbook description here.
+Chef configuration for OSRF build farm agents.
 

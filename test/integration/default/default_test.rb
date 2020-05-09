@@ -1,7 +1,5 @@
-# InSpec test for recipe osrf_jenkins::default
+# InSpec test for recipe osrf_jenkins_agent::default
 
-# The InSpec reference, with examples and extensive documentation, can be
-# found at https://www.inspec.io/docs/reference/resources/
 
 unless os.windows?
   # This is an example test, replace with your own test.
@@ -14,3 +12,4 @@ end
 describe port(80), :skip do
   it { should_not be_listening }
 end
+
