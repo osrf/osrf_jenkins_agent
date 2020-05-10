@@ -18,7 +18,6 @@ end
   mercurial
   ntp
   qemu-user-static
-  squid-deb-proxy
   sudo
   wget
 ].each do |pkg|
@@ -31,7 +30,35 @@ cookbook_file "/etc/lightdm/xhost.sh" do
   mode "0744"
   notifies :restart, "service[lightdm]", :delayed
 end
+cookbook_file "/etc/lightdm/lightdm.conf" do
+  source "lightdm/lightdm.conf"
+  action :create_if_missing
+end
+ruby_block "Ensure display-setup-script" do
+  block do
+    lightdm_conf = Chef::Util::FileEdit.new("/etc/lightdm/lightdm.conf")
+    lightdm_conf.search_file_replace_line %r{^display-setup-script=.*},
+      "display-setup-script=/etc/lightdm/xhost.conf"
+    lightdm_conf.insert_line_if_no_match %r{^display-setup-script=.*},
+      "display-setup-script=/etc/lightdm/xhost.conf"
+    lightdm_conf.write_file if lightdm_conf.unwritten_changes?
+  end
+end
 service "lightdm" do
+  action [:start, :enable]
+end
+
+package "squid-deb-proxy"
+directory "/etc/squid-deb-proxy/mirror-dstdomain.acl.d" do
+  recursive true
+end
+%w[11-ubuntuppa 12-osrfoundation 13-debian].each do |conf|
+  cookbook_file "/etc/squid-deb-proxy/mirror-dstdomain.acl.d/#{conf}" do
+    source "squid-deb-proxy/mirror-dstdomain.acl.d/#{conf}"
+    notifies :restart, "service[squid-deb-proxy]", :delayed
+  end
+end
+service "squid-deb-proxy" do
   action [:start, :enable]
 end
 
@@ -39,35 +66,47 @@ end
 docker_installation_package "default" do
   setup_docker_repo true
 end
+service "docker" do
+  action [:start, :enable]
+end
 
 remote_file "/tmp/nvidia-docker.gpgkey" do
   source "https://nvidia.github.io/nvidia-docker/gpgkey"
   # TODO check if key is already added.
   # not_if ...
 end
-
 execute "apt-key add /tmp/nvidia-docker.gpgkey" do
   # TODO check if key is already added.
   # not_if ...
 end
-
 apt_update "nvidia-docker" do
   action :nothing
 end
-
 remote_file "/etc/apt/sources.list.d/nvidia-docker.list" do
   source "https://nvidia.github.io/nvidia-docker/#{node["platform"]}#{node["platform_version"]}/nvidia-docker.list"
   notifies :update, "apt_update[nvidia-docker]", :immediate
 end
-
-package "nvidia-docker"
-package "nvidia-modprobe"
+package "nvidia-docker" do
+  notifies :restart, "service[docker]", :delayed
+end
+package "nvidia-modprobe" do
+  notifies :restart, "service[docker]", :delayed
+end
 
 user "jenkins" do
   shell "/bin/bash"
   manage_home true
 end
-
-
-
+sudo "jenkins" do
+  user "jenkins"
+  nopasswd true
+end
+directory "/home/jenkins/jenkins-agent"
+agent_jar_url = node["osrf_jenkins_agent"]["agent_jar_url"]
+if agent_jar_url.nil? || agent_jar_url.empty?
+  agent_jar_url = "#{node["osrf_jenkins_agent"]["jenkins_url"]}/jnlpJars/agent.jar"
+end
+remote_file "/home/jenkins/jenkins-agent/agent.jar" do
+  source agent_jar_url
+end
 
