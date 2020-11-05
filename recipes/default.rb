@@ -44,8 +44,12 @@ ruby_block "Ensure display-setup-script" do
     lightdm_conf.write_file if lightdm_conf.unwritten_changes?
   end
 end
-service "lightdm" do
-  action [:start, :enable]
+
+# no lightdm for development
+if ['github_ci'].include? node.chef_environment
+  service "lightdm" do
+    action [:start, :enable]
+  end
 end
 
 package "squid-deb-proxy"
@@ -89,4 +93,3 @@ end
 remote_file "/home/jenkins/jenkins-agent/agent.jar" do
   source agent_jar_url
 end
-
