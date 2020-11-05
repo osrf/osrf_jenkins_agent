@@ -9,7 +9,7 @@ jobs:
     name: Ubuntu 20.04
     strategy:
       matrix:
-        suite: ['agent', 'repo', 'jenkins']
+        suite: ['agent']
         chef_version: ['chef15', 'chef16']
       fail-fast: false
     steps:
