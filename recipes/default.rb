@@ -62,7 +62,6 @@ service "squid-deb-proxy" do
   action [:start, :enable]
 end
 
-
 docker_installation_package "default" do
   setup_docker_repo true
 end
@@ -70,25 +69,6 @@ service "docker" do
   action [:start, :enable]
 end
 
-remote_file "/tmp/nvidia-docker.gpgkey" do
-  source "https://nvidia.github.io/nvidia-docker/gpgkey"
-  # TODO check if key is already added.
-  # not_if ...
-end
-execute "apt-key add /tmp/nvidia-docker.gpgkey" do
-  # TODO check if key is already added.
-  # not_if ...
-end
-apt_update "nvidia-docker" do
-  action :nothing
-end
-remote_file "/etc/apt/sources.list.d/nvidia-docker.list" do
-  source "https://nvidia.github.io/nvidia-docker/#{node["platform"]}#{node["platform_version"]}/nvidia-docker.list"
-  notifies :update, "apt_update[nvidia-docker]", :immediate
-end
-package "nvidia-docker" do
-  notifies :restart, "service[docker]", :delayed
-end
 package "nvidia-modprobe" do
   notifies :restart, "service[docker]", :delayed
 end
