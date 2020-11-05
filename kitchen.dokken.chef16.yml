@@ -12,7 +12,7 @@ transport:
 provisioner:
   name: dokken
   chef_binary: /opt/chef/bin/chef-solo
-  chef_options: "-Edevelopment"
+  chef_options: "-Etest"
   chef_log_level: debug
   chef_output_format: doc
 
