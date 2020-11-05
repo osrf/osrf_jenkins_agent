@@ -45,11 +45,10 @@ ruby_block "Ensure display-setup-script" do
   end
 end
 
-# no lightdm for development
-if ['development'].include? node.chef_environment
-  service "lightdm" do
-    action [:start, :enable]
-  end
+service "lightdm" do
+  action [:start, :enable]
+  # no lightdm for development (CI on github)
+  not_if ['development'].include? node.chef_environment
 end
 
 package "squid-deb-proxy"
