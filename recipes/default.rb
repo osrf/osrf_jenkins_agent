@@ -20,6 +20,7 @@ end
   ntp
   qemu-user-static
   sudo
+  x11-xserver-utils
   wget
 ].each do |pkg|
   package pkg
