@@ -48,7 +48,7 @@ end
 service "lightdm" do
   action [:start, :enable]
   # no lightdm for test (CI on github)
-  not_if ['test'].include? node.chef_environment
+  not_if { ['test'].include? node.chef_environment }
 end
 
 package "squid-deb-proxy"
