@@ -11,6 +11,7 @@ end
 
 %w[
   default-jre-headless
+  docker.io
   gnupg2
   groovy
   libffi-dev
@@ -62,37 +63,6 @@ service "squid-deb-proxy" do
   action [:start, :enable]
 end
 
-
-docker_installation_package "default" do
-  setup_docker_repo true
-end
-service "docker" do
-  action [:start, :enable]
-end
-
-remote_file "/tmp/nvidia-docker.gpgkey" do
-  source "https://nvidia.github.io/nvidia-docker/gpgkey"
-  # TODO check if key is already added.
-  # not_if ...
-end
-execute "apt-key add /tmp/nvidia-docker.gpgkey" do
-  # TODO check if key is already added.
-  # not_if ...
-end
-apt_update "nvidia-docker" do
-  action :nothing
-end
-remote_file "/etc/apt/sources.list.d/nvidia-docker.list" do
-  source "https://nvidia.github.io/nvidia-docker/#{node["platform"]}#{node["platform_version"]}/nvidia-docker.list"
-  notifies :update, "apt_update[nvidia-docker]", :immediate
-end
-package "nvidia-docker" do
-  notifies :restart, "service[docker]", :delayed
-end
-package "nvidia-modprobe" do
-  notifies :restart, "service[docker]", :delayed
-end
-
 user "jenkins" do
   shell "/bin/bash"
   manage_home true
@@ -101,6 +71,15 @@ sudo "jenkins" do
   user "jenkins"
   nopasswd true
 end
+
+# Add agent user to the docker group to allow them to build and run docker
+# containers.
+group 'docker' do
+  append true
+  members 'jenkins'
+  action :manage # Group should be created by docker package.
+end
+
 directory "/home/jenkins/jenkins-agent"
 agent_jar_url = node["osrf_jenkins_agent"]["agent_jar_url"]
 if agent_jar_url.nil? || agent_jar_url.empty?
@@ -109,4 +88,3 @@ end
 remote_file "/home/jenkins/jenkins-agent/agent.jar" do
   source agent_jar_url
 end
-
