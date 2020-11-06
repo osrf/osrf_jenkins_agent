@@ -31,3 +31,8 @@ jobs:
     - name: Debug journalctl
       if: ${{ failure() }}
       run: journalctl -xe
+    - name: Debug X
+      if: ${{ failure() }}
+      run: |
+          systemctl status lightdm.service
+          cat /var/log/Xorg.0.log
