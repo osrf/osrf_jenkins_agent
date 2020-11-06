@@ -11,6 +11,7 @@ end
 
 %w[
   default-jre-headless
+  docker.io
   gnupg2
   groovy
   libffi-dev
@@ -65,17 +66,6 @@ service "squid-deb-proxy" do
   action [:start, :enable]
 end
 
-docker_installation_package "default" do
-  setup_docker_repo true
-end
-service "docker" do
-  action [:start, :enable]
-end
-
-package "nvidia-modprobe" do
-  notifies :restart, "service[docker]", :delayed
-end
-
 user "jenkins" do
   shell "/bin/bash"
   manage_home true
@@ -84,6 +74,15 @@ sudo "jenkins" do
   user "jenkins"
   nopasswd true
 end
+
+# Add agent user to the docker group to allow them to build and run docker
+# containers.
+group 'docker' do
+  append true
+  members 'jenkins'
+  action :manage # Group should be created by docker package.
+end
+
 directory "/home/jenkins/jenkins-agent"
 agent_jar_url = node["osrf_jenkins_agent"]["agent_jar_url"]
 if agent_jar_url.nil? || agent_jar_url.empty?
