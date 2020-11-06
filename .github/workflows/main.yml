@@ -25,3 +25,9 @@ jobs:
       env:
         CHEF_LICENSE: accept-no-persist
         KITCHEN_LOCAL_YAML: kitchen.dokken.${{ matrix.chef_version }}.yml
+    - name: Debug kitchen log
+      if: ${{ failure() }}
+      run: cat .kitchen/logs/kitchen.log
+    - name: Debug journalctl
+      if: ${{ failure() }}
+      run: journalctl -xe
