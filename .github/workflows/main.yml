@@ -36,9 +36,9 @@ jobs:
           suite: ${{ matrix.suite }}
           os: 'ubuntu-2004'
         env:
-          chef_license: accept-no-persist
-          chef_version: ${{ matrix.chef_version }}
-          kitchen_local_yaml: kitchen.dokken.yml
+          CHEF_LICENSE: accept-no-persist
+          CHEF_VERSION: ${{ matrix.chef_version }}
+          KITCHEN_LOCAL_YAML: kitchen.dokken.yml
       - name: print debug output on failure
         if: failure()
         run: |
