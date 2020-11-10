@@ -52,6 +52,13 @@ jobs:
             KITCHEN_LOCAL_YAML=kitchen.dokken.yml /usr/bin/kitchen exec \
                 ${{ matrix.suite }}-${{ matrix.os }} \
                 -c "cat /var/log/Xorg.0.log"
+      - name: Print debug output on failure (systemctl lightdm status)
+        if: failure()
+        run: |
+            set -x
+            KITCHEN_LOCAL_YAML=kitchen.dokken.yml /usr/bin/kitchen exec \
+                ${{ matrix.suite }}-${{ matrix.os }} \
+                -c "systemctl status lightdm"
       - name: Print debug output on failure (systemctl jenkins-agent status)
         if: failure()
         run: |
