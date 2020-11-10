@@ -38,13 +38,13 @@ jobs:
           CHEF_LICENSE: accept-no-persist
           CHEF_VERSION: ${{ matrix.chef_version }}
           KITCHEN_LOCAL_YAML: kitchen.dokken.yml
-      - name: Print debug output (journalctl)
+      - name: Print debug output (lightdm)
         if: failure()
         run: |
             set -x
             KITCHEN_LOCAL_YAML=kitchen.dokken.yml /usr/bin/kitchen exec \
                 ${{ matrix.suite }}-${{ matrix.os }} \
-                -c "journalctl -l"
+                -c "find /var/log/lightdm/ -name '*.log' -exec cat {} \;"
       - name: Print debug output on failure (X.log)
         if: failure()
         run: |
