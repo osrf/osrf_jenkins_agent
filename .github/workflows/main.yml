@@ -1,38 +1,49 @@
 ---
-name: kitchen test
+name: ci
 
-on: push
+
+"on":
+  pull_request:
+  push:
 
 jobs:
+  yamllint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: check out code
+        uses: actions/checkout@master
+      - name: run yaml lint
+        uses: actionshub/yamllint@master
   test:
     runs-on: ubuntu-20.04
-    name: Ubuntu 20.04
+    name: ubuntu 20.04
     strategy:
       matrix:
-        suite: ['agent']
-        chef_version: ['chef15', 'chef16']
+        suite:
+          - 'agent'
+        chef_version:
+          - '15'
+          - '16'
       fail-fast: false
     steps:
-    - name: Check out code
-      uses: actions/checkout@master
-    - name: Install Chef
-      uses: actionshub/chef-install@master
-    - name: Test-Kitchen
-      uses: actionshub/test-kitchen@master
-      with:
-        suite: ${{ matrix.suite }}
-        os: 'ubuntu-2004'
-      env:
-        CHEF_LICENSE: accept-no-persist
-        KITCHEN_LOCAL_YAML: kitchen.dokken.${{ matrix.chef_version }}.yml
-    - name: Debug kitchen log
-      if: ${{ failure() }}
-      run: cat .kitchen/logs/kitchen.log
-    - name: Debug journalctl
-      if: ${{ failure() }}
-      run: journalctl -xe
-    - name: Debug X
-      if: ${{ failure() }}
-      run: |
-          systemctl status lightdm.service
-          cat /var/log/Xorg.0.log
+      - name: check out code
+        uses: actions/checkout@master
+      - name: install chef
+        uses: actionshub/chef-install@master
+      - name: test-kitchen
+        uses: actionshub/test-kitchen@master
+        with:
+          suite: ${{ matrix.suite }}
+          os: 'ubuntu-2004'
+        env:
+          chef_license: accept-no-persist
+          chef_version: ${{ matrix.chef_version }}
+          kitchen_local_yaml: kitchen.dokken.yml
+      - name: print debug output on failure
+        if: failure()
+        run: |
+            set -x
+            sudo journalctl -l --since today
+            kitchen_local_yaml=kitchen.dokken.yml /usr/bin/kitchen exec \
+                ${{ matrix.suite }}-${{ matrix.chef_version }} \
+                -c "journalctl -l"
