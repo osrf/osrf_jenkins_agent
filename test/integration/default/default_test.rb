@@ -1,7 +1,7 @@
 # InSpec test for recipe osrf_jenkins_agent::default
 control 'agent_user' do
   impact 'critical'
-  describe 'User jenkins should present in the system'
+  title 'User jenkins should present in the system'
   # attributes are not directly accesible from inspec. Hardcoding user here
   describe user('jenkins') do
     it { should exist }
@@ -10,9 +10,18 @@ end
 
 control 'no_open_ports' do
   impact 'low'
-  describe 'Check no expected open ports exists'
+  title 'Check no expected open ports exists'
   describe port(80) do
     it { should_not be_listening }
+  end
+end
+
+control 'xhost file is fine' do
+  impact 'critical'
+  title 'Check that xhost.sh file can be executed fine'
+
+  describe command('/etc/lightdm/xhost.sh') do
+    its('exit_status') { should eq 0 }
   end
 end
 
