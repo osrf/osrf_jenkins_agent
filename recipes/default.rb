@@ -10,7 +10,6 @@ apt_update "default" do
 end
 
 %w[
-  dconf
   default-jre-headless
   docker.io
   gnupg2
