@@ -40,6 +40,10 @@ cookbook_file '/etc/X11/xorg.conf' do
   mode "0744"
   only_if "ls /dev/nvidia*"
 end
+env 'DISPLAY' do
+  # TODO: assuming :0 here is fragile
+  value ':0'
+end
 
 package "lightdm"
 cookbook_file "/etc/lightdm/xhost.sh" do
@@ -103,8 +107,6 @@ sudo agent_username do
   nopasswd true
 end
 
-# Add agent user to the docker group to allow them to build and run docker
-# containers.
 group 'docker' do
   append true
   members agent_username
