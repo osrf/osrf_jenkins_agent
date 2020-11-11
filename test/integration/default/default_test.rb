@@ -3,7 +3,7 @@ control 'agent_user' do
   impact 'critical'
   describe 'User jenkins should present in the system'
   # attributes are not directly accesible from inspec. Hardcoding user here
-  describe 'jenkins' do
+  describe user('jenkins') do
     it { should exist }
   end
 end
@@ -19,17 +19,18 @@ end
 control 'nvidia' do
   impact 'critical'
   title 'nvidia support in nvidia nodes'
+  only_if('nvidia support exists') do
+    commands 'ls /dev/nvidia*'
+  end 
   describe file('/etc/X11/xorg.conf') do
     its('content') { should match /nvidia/ }
   end
-
-  not_if "ls /dev/nvidia*"
 end
 
 control 'lightdm' do
   impact 'critical'
   title 'lightdm service should be up and running'
-  describe service("lightdm") do
+  describe service('lightdm') do
       it { should be_enabled }
       it { should be_installed }
       it { should be_running }
@@ -39,7 +40,7 @@ end
 control 'jenkins-agent' do
   impact 'critical'
   title 'jenkins-agent service should be up and running'
-  describe service("jenkins-agent") do
+  describe service('jenkins-agent') do
       it { should be_enabled }
       it { should be_installed }
       # imposible to connect to server in tests, should not be up
