@@ -32,6 +32,14 @@ Section "Monitor"
     Option         "DPMS"
 EndSection
 
+Section "Device"
+    Identifier     "Device0"
+    Driver         "nvidia"
+    VendorName     "NVIDIA Corporation"
+    BoardName      "GRID K520"
+    BusID          "PCI:0:3:0"
+EndSection
+
 Section "Screen"
     Identifier     "Default Screen"
     Device         "Device0"

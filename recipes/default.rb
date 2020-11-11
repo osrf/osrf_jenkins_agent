@@ -27,8 +27,14 @@ end
 end
 
 cookbook_file '/etc/X11/xorg.conf' do
-  source 'xorg.conf'
+  source 'xorg.conf.no_gpu'
   mode "0744"
+  not_if "ls /dev/nvidia*"
+end
+cookbook_file '/etc/X11/xorg.conf' do
+  source 'xorg.conf.nvidia'
+  mode "0744"
+  only_if "ls /dev/nvidia*"
 end
 
 package "lightdm"
