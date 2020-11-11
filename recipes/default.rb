@@ -10,6 +10,7 @@ apt_update "default" do
 end
 
 %w[
+  dconf
   default-jre-headless
   docker.io
   gnupg2
@@ -27,6 +28,8 @@ end
 end
 
 package "lightdm"
+
+
 cookbook_file "/etc/lightdm/xhost.sh" do
   source "lightdm/xhost.sh"
   mode "0744"
@@ -45,6 +48,15 @@ ruby_block "Ensure display-setup-script" do
       "display-setup-script=/etc/lightdm/xhost.conf"
     lightdm_conf.write_file if lightdm_conf.unwritten_changes?
   end
+end
+
+execute 'set-lighdm-display-manager' do
+  command "echo 'gdm3 shared/default-x-display-manager select lightdm' | sudo debconf-set-selections"
+  not_if 'grep lightdm /etc/X11/default-display-manager'
+end
+execute 'reconfigure-gdm3' do
+  command "dpkg-reconfigure gdm3 -f noninteractive"
+  not_if 'grep lightdm /etc/X11/default-display-manager'
 end
 
 service "lightdm" do
