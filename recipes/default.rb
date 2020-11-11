@@ -4,6 +4,10 @@
 #
 # Copyright:: 2020, Open Source Robotics Foundation.
 #
+
+agent_username = node['osrf_buildfarm']['agent']['agent_username']
+agent_homedir = "/home/#{agent_username}"
+
 apt_update "default" do
   action :periodic
   frequency 3600
@@ -90,7 +94,6 @@ service "squid-deb-proxy" do
   action [:start, :enable]
 end
 
-agent_username = node['osrf_buildfarm']['agent']['agent_username']
 user agent_username  do
   shell "/bin/bash"
   manage_home true
