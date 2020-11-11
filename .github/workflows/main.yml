@@ -44,7 +44,7 @@ jobs:
             set -x
             KITCHEN_LOCAL_YAML=kitchen.dokken.yml /usr/bin/kitchen exec \
                 ${{ matrix.suite }}-${{ matrix.os }} \
-                -c "find /var/log/lightdm/ -name '*.log' -exec cat {} \;"
+                -c "cat /var/log/lightdm/lightdm.log"
       - name: Print debug output on failure (X.log)
         if: failure()
         run: |

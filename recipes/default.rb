@@ -26,9 +26,12 @@ end
   package pkg
 end
 
+cookbook_file '/etc/X11/xorg.conf' do
+  source 'xorg.conf'
+  mode "0744"
+end
+
 package "lightdm"
-
-
 cookbook_file "/etc/lightdm/xhost.sh" do
   source "lightdm/xhost.sh"
   mode "0744"
