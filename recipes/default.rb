@@ -58,15 +58,20 @@ ruby_block "Ensure display-setup-script" do
   end
 end
 
-execute 'set-lighdm-display-manager' do
-  command "echo 'gdm3 shared/default-x-display-manager select lightdm' | sudo debconf-set-selections"
+# set lightdm as the display manager requires 3 commands
+execute 'set-lighdm-display-manager debconf' do
+  command 'echo set shared/default-x-display-manager lightdm | debconf-communicate'
   not_if 'grep lightdm /etc/X11/default-display-manager'
 end
 execute 'reconfigure-gdm3' do
-  command "dpkg-reconfigure gdm3 -f noninteractive"
+  command 'dpkg-reconfigure lightdm'
+  environment ({'DEBIAN_FRONTEND' => 'noninteractive', 'DEBCONF_NONINTERACTIVE_SEEN' => 'true'})
   not_if 'grep lightdm /etc/X11/default-display-manager'
 end
-
+execute 'set-lightdm-display-manager-etc' do
+  command 'echo "/usr/sbin/lightdm" > /etc/X11/default-display-manager'
+  not_if 'grep lightdm /etc/X11/default-display-manager'
+end
 service "lightdm" do
   action [:start, :enable]
 end
