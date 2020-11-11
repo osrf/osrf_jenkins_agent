@@ -20,7 +20,7 @@ control 'nvidia' do
   impact 'critical'
   title 'nvidia support in nvidia nodes'
   only_if('nvidia support exists') do
-    commands 'ls /dev/nvidia*'
+    command 'ls /dev/nvidia*'
   end 
   describe file('/etc/X11/xorg.conf') do
     its('content') { should match /nvidia/ }
