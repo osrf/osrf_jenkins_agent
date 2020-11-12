@@ -16,20 +16,10 @@ control 'no_open_ports' do
   end
 end
 
-control 'xhost file' do
-  impact 'critical'
-  title 'Check that xhost.sh file can be executed fine'
-
-  describe command('/etc/lightdm/xhost.sh') do
-    its('stderr') { should eq '' }
-    its('exit_status') { should eq 0 }
-  end
-end
-
 control 'nvidia' do
   impact 'critical'
   title 'nvidia support in nvidia nodes'
-  only_if('nvidia support exists') { command('ls /dev/nvidia*').exit_code == 0 }
+  only_if command('ls /dev/nvidia*').exit_status eq 0
   describe file('/etc/X11/xorg.conf') do
     its('content') { should match /nvidia/ }
   end
