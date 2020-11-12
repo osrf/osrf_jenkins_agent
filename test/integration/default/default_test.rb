@@ -19,7 +19,7 @@ end
 control 'nvidia' do  
   impact 'critical'
   title 'nvidia support in nvidia nodes'
-  only_if { file('/dev/nvidia0').exists? }
+  only_if file('/dev/nvidia0').exists
   describe file('/etc/X11/xorg.conf') do
     its('content') { should match /nvidia/ }
   end
