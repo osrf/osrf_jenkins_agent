@@ -19,7 +19,8 @@ end
 control 'nvidia' do
   impact 'critical'
   title 'nvidia support in nvidia nodes'
-  only_if command('ls /dev/nvidia*').exit_status eq 0
+#  only_if { command('ls /dev/nvidia*').exit_status eq 0 }
+  only_if "ls /dev/nvidia*"
   describe file('/etc/X11/xorg.conf') do
     its('content') { should match /nvidia/ }
   end
