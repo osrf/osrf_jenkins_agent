@@ -40,10 +40,8 @@ cookbook_file '/etc/X11/xorg.conf' do
   mode "0744"
   only_if "ls /dev/nvidia*"
 end
-env 'DISPLAY' do
-  # TODO: assuming :0 here is fragile
-  value ':0'
-end
+# TODO: assuming :0 here is fragile
+ENV['DISPLAY'] = ':0'
 
 package "lightdm"
 cookbook_file "/etc/lightdm/xhost.sh" do
