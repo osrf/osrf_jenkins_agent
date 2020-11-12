@@ -16,11 +16,12 @@ control 'no_open_ports' do
   end
 end
 
-control 'nvidia' do
+control 'nvidia' do  
   impact 'critical'
   title 'nvidia support in nvidia nodes'
-#  only_if { command('ls /dev/nvidia*').exit_status eq 0 }
-  only_if "ls /dev/nvidia*"
+ only_if do
+    file('/dev/nvidia0').exists?
+  end
   describe file('/etc/X11/xorg.conf') do
     its('content') { should match /nvidia/ }
   end
