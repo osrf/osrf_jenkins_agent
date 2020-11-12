@@ -17,7 +17,7 @@ control 'no_open_ports' do
 end
 
 # Unable to make only_if to work with this check
-if File.file?('/dev/nvidia0').exists?
+if File.file?('/dev/nvidia0').exist?
   control 'nvidia' do  
     impact 'critical'
     title 'nvidia support in nvidia nodes'
