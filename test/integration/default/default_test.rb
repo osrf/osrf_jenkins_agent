@@ -16,14 +16,17 @@ control 'no_open_ports' do
   end
 end
 
-control 'nvidia' do  
-  impact 'critical'
-  title 'nvidia support in nvidia nodes'
-  only_if { file('/dev/nvidia0').exists? }
-  describe file('/etc/X11/xorg.conf') do
-    its('content') { should match /nvidia/ }
+# Unable to make only_if to work with this check
+if file('/dev/nvidia0').exists?
+  control 'nvidia' do  
+    impact 'critical'
+    title 'nvidia support in nvidia nodes'
+    describe file('/etc/X11/xorg.conf') do
+      its('content') { should match /nvidia/ }
+    end
   end
 end
+
 
 control 'lightdm' do
   impact 'critical'
