@@ -4,6 +4,8 @@ name: ci
 "on":
   pull_request:
   push:
+    branches:
+      - latest
 
 jobs:
   yamllint:
