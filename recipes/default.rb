@@ -4,6 +4,10 @@
 #
 # Copyright:: 2020, Open Source Robotics Foundation.
 #
+
+agent_username = node['osrf_buildfarm']['agent']['agent_username']
+agent_homedir = "/home/#{agent_username}"
+
 apt_update "default" do
   action :periodic
   frequency 3600
@@ -63,12 +67,12 @@ service "squid-deb-proxy" do
   action [:start, :enable]
 end
 
-user "jenkins" do
+user agent_username  do
   shell "/bin/bash"
   manage_home true
 end
-sudo "jenkins" do
-  user "jenkins"
+sudo agent_username do
+  user agent_username
   nopasswd true
 end
 
@@ -76,15 +80,54 @@ end
 # containers.
 group 'docker' do
   append true
-  members 'jenkins'
+  members agent_username
   action :manage # Group should be created by docker package.
 end
 
-directory "/home/jenkins/jenkins-agent"
-agent_jar_url = node["osrf_jenkins_agent"]["agent_jar_url"]
-if agent_jar_url.nil? || agent_jar_url.empty?
-  agent_jar_url = "#{node["osrf_jenkins_agent"]["jenkins_url"]}/jnlpJars/agent.jar"
-end
-remote_file "/home/jenkins/jenkins-agent/agent.jar" do
+directory "/home/#{agent_username}/jenkins-agent"
+agent_jar_url = "#{node['osrf_buildfarm']['agent']['jenkins_url']}/jnlpJars/agent.jar"
+agent_jarfile_path = "/home/#{agent_username}/jenkins-agent/agent.jar"
+remote_file agent_jarfile_path do
   source agent_jar_url
+  owner agent_username
+  group agent_username
+  mode '0444'
+end
+
+jenkins_username = node['osrf_buildfarm']['agent']['username']
+agent_jenkins_user = search('osrf_buildfarm_jenkins_users', "username:#{jenkins_username}").first
+template '/etc/default/jenkins-agent' do
+  source 'jenkins-agent.env.erb'
+  variables Hash[
+    java_args: node['osrf_buildfarm']['agent']['java_args'],
+    jarfile: agent_jarfile_path,
+    jenkins_url: node['osrf_buildfarm']['jenkins_url'],
+    username: jenkins_username,
+    password: agent_jenkins_user['password'],
+    name: node['osrf_buildfarm']['agent']['nodename'],
+    description: node['osrf_buildfarm']['agent']['description'],
+    executors: node['osrf_buildfarm']['agent']['executors'],
+    user_home: agent_homedir,
+    labels: node['osrf_buildfarm']['agent']['labels'],
+  ]
+  notifies :restart, 'service[jenkins-agent]'
+end
+
+template '/etc/systemd/system/jenkins-agent.service' do
+  source 'jenkins-agent.service.erb'
+  variables Hash[
+    service_name: 'jenkins-agent',
+    username: agent_username,
+  ]
+  notifies :run, 'execute[systemctl-daemon-reload]', :immediately
+  notifies :restart, 'service[jenkins-agent]'
+end
+
+execute 'systemctl-daemon-reload' do
+  command 'systemctl daemon-reload'
+  action :nothing
+end
+
+service 'jenkins-agent' do
+  action [:start, :enable]
 end
