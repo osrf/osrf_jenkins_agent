@@ -105,6 +105,8 @@ sudo agent_username do
   nopasswd true
 end
 
+# Add agent user to the docker group to allow them to build and run docker
+# containers.
 group 'docker' do
   append true
   members agent_username
