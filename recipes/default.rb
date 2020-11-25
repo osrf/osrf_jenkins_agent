@@ -22,6 +22,7 @@ end
   libssl-dev
   mercurial
   ntp
+  openjdk-8-jdk-headless
   qemu-user-static
   sudo
   x11-xserver-utils
@@ -113,11 +114,16 @@ group 'docker' do
   action :manage # Group should be created by docker package.
 end
 
-directory "/home/#{agent_username}/jenkins-agent"
-agent_jar_url = "#{node['osrf_buildfarm']['agent']['jenkins_url']}/jnlpJars/agent.jar"
-agent_jarfile_path = "/home/#{agent_username}/jenkins-agent/agent.jar"
-remote_file agent_jarfile_path do
-  source agent_jar_url
+
+# TODO: how to read attributes from chef-osrf plugins into this cookbook
+# swarm_client_version = node['jenkins-plugins']['swarm']
+swarm_client_version = "3.24"
+swarm_client_url = "https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/#{swarm_client_version}/swarm-client-#{swarm_client_version}.jar"
+swarm_client_jarfile_path = "/home/#{agent_username}/swarm-client-#{swarm_client_version}.jar"
+
+# Download swarm client program from url and install it to the jenkins-agent user's home directory.
+remote_file swarm_client_jarfile_path do
+  source swarm_client_url
   owner agent_username
   group agent_username
   mode '0444'
@@ -129,7 +135,7 @@ template '/etc/default/jenkins-agent' do
   source 'jenkins-agent.env.erb'
   variables Hash[
     java_args: node['osrf_buildfarm']['agent']['java_args'],
-    jarfile: agent_jarfile_path,
+    jarfile: swarm_client_jarfile_path,
     jenkins_url: node['osrf_buildfarm']['jenkins_url'],
     username: jenkins_username,
     password: agent_jenkins_user['password'],
