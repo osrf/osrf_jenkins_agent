@@ -165,4 +165,6 @@ end
 
 service 'jenkins-agent' do
   action [:start, :enable]
+  # can not connect to server while testing
+  not_if node.chef_environment == "test"
 end
