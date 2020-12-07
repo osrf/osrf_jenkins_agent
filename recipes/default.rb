@@ -58,9 +58,9 @@ ruby_block "Ensure display-setup-script" do
   block do
     lightdm_conf = Chef::Util::FileEdit.new("/etc/lightdm/lightdm.conf")
     lightdm_conf.search_file_replace_line %r{^display-setup-script=.*},
-      "display-setup-script=/etc/lightdm/xhost.conf"
+      "display-setup-script=/etc/lightdm/xhost.sh"
     lightdm_conf.insert_line_if_no_match %r{^display-setup-script=.*},
-      "display-setup-script=/etc/lightdm/xhost.conf"
+      "display-setup-script=/etc/lightdm/xhost.sh"
     lightdm_conf.write_file if lightdm_conf.unwritten_changes?
   end
 end
