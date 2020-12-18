@@ -1,0 +1,70 @@
+---
+name: ci
+
+"on":
+  pull_request:
+  push:
+    branches:
+      - latest
+
+jobs:
+  yamllint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: check out code
+        uses: actions/checkout@master
+      - name: run yaml lint
+        uses: actionshub/yamllint@master
+  test:
+    runs-on: ubuntu-20.04
+    name: ubuntu 20.04
+    strategy:
+      matrix:
+        suite:
+          - 'agent'
+        chef_version:
+          - '15'
+          - '16'
+      fail-fast: false
+    steps:
+      - name: check out code
+        uses: actions/checkout@master
+      - name: install chef
+        uses: actionshub/chef-install@master
+      - name: test-kitchen
+        uses: actionshub/test-kitchen@master
+        with:
+          suite: ${{ matrix.suite }}
+          os: 'ubuntu-2004'
+        env:
+          CHEF_LICENSE: accept-no-persist
+          CHEF_VERSION: ${{ matrix.chef_version }}
+          KITCHEN_LOCAL_YAML: kitchen.dokken.yml
+      - name: Print debug output (lightdm)
+        if: failure()
+        run: |
+            set -x
+            KITCHEN_LOCAL_YAML=kitchen.dokken.yml /usr/bin/kitchen exec \
+                ${{ matrix.suite }}-${{ matrix.os }} \
+                -c "cat /var/log/lightdm/lightdm.log"
+      - name: Print debug output on failure (X.log)
+        if: failure()
+        run: |
+            set -x
+            KITCHEN_LOCAL_YAML=kitchen.dokken.yml /usr/bin/kitchen exec \
+                ${{ matrix.suite }}-${{ matrix.os }} \
+                -c "cat /var/log/Xorg.0.log"
+      - name: Print debug output on failure (systemctl lightdm status)
+        if: failure()
+        run: |
+            set -x
+            KITCHEN_LOCAL_YAML=kitchen.dokken.yml /usr/bin/kitchen exec \
+                ${{ matrix.suite }}-${{ matrix.os }} \
+                -c "systemctl status lightdm"
+      - name: Print debug output on failure (systemctl jenkins-agent status)
+        if: failure()
+        run: |
+            set -x
+            KITCHEN_LOCAL_YAML=kitchen.dokken.yml /usr/bin/kitchen exec \
+                ${{ matrix.suite }}-${{ matrix.os }} \
+                -c "systemctl status jenkins-agent"

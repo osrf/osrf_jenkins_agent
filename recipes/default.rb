@@ -25,10 +25,24 @@ end
   openjdk-8-jdk-headless
   qemu-user-static
   sudo
+  x11-xserver-utils
   wget
 ].each do |pkg|
   package pkg
 end
+
+cookbook_file '/etc/X11/xorg.conf' do
+  source 'xorg.conf.no_gpu'
+  mode "0744"
+  not_if "ls /dev/nvidia*"
+end
+cookbook_file '/etc/X11/xorg.conf' do
+  source 'xorg.conf.nvidia'
+  mode "0744"
+  only_if "ls /dev/nvidia*"
+end
+# TODO: assuming :0 here is fragile
+ENV['DISPLAY'] = ':0'
 
 package "lightdm"
 cookbook_file "/etc/lightdm/xhost.sh" do
@@ -49,6 +63,21 @@ ruby_block "Ensure display-setup-script" do
       "display-setup-script=/etc/lightdm/xhost.sh"
     lightdm_conf.write_file if lightdm_conf.unwritten_changes?
   end
+end
+
+# set lightdm as the display manager requires 3 commands
+execute 'set-lighdm-display-manager debconf' do
+  command 'echo set shared/default-x-display-manager lightdm | debconf-communicate'
+  not_if 'grep lightdm /etc/X11/default-display-manager'
+end
+execute 'reconfigure-gdm3' do
+  command 'dpkg-reconfigure lightdm'
+  environment ({'DEBIAN_FRONTEND' => 'noninteractive', 'DEBCONF_NONINTERACTIVE_SEEN' => 'true'})
+  not_if 'grep lightdm /etc/X11/default-display-manager'
+end
+execute 'set-lightdm-display-manager-etc' do
+  command 'echo "/usr/sbin/lightdm" > /etc/X11/default-display-manager'
+  not_if 'grep lightdm /etc/X11/default-display-manager'
 end
 service "lightdm" do
   action [:start, :enable]
