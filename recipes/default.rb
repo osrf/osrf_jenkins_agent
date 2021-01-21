@@ -4,6 +4,10 @@
 #
 # Copyright:: 2020, Open Source Robotics Foundation.
 #
+
+agent_username = node['osrf_buildfarm']['agent']['agent_username']
+agent_homedir = "/home/#{agent_username}"
+
 apt_update "default" do
   action :periodic
   frequency 3600
@@ -18,6 +22,7 @@ end
   libssl-dev
   mercurial
   ntp
+  openjdk-8-jdk-headless
   qemu-user-static
   sudo
   x11-xserver-utils
@@ -53,9 +58,9 @@ ruby_block "Ensure display-setup-script" do
   block do
     lightdm_conf = Chef::Util::FileEdit.new("/etc/lightdm/lightdm.conf")
     lightdm_conf.search_file_replace_line %r{^display-setup-script=.*},
-      "display-setup-script=/etc/lightdm/xhost.conf"
+      "display-setup-script=/etc/lightdm/xhost.sh"
     lightdm_conf.insert_line_if_no_match %r{^display-setup-script=.*},
-      "display-setup-script=/etc/lightdm/xhost.conf"
+      "display-setup-script=/etc/lightdm/xhost.sh"
     lightdm_conf.write_file if lightdm_conf.unwritten_changes?
   end
 end
@@ -92,12 +97,12 @@ service "squid-deb-proxy" do
   action [:start, :enable]
 end
 
-user "jenkins" do
+user agent_username  do
   shell "/bin/bash"
   manage_home true
 end
-sudo "jenkins" do
-  user "jenkins"
+sudo agent_username do
+  user agent_username
   nopasswd true
 end
 
@@ -105,15 +110,61 @@ end
 # containers.
 group 'docker' do
   append true
-  members 'jenkins'
+  members agent_username
   action :manage # Group should be created by docker package.
 end
 
-directory "/home/jenkins/jenkins-agent"
-agent_jar_url = node["osrf_jenkins_agent"]["agent_jar_url"]
-if agent_jar_url.nil? || agent_jar_url.empty?
-  agent_jar_url = "#{node["osrf_jenkins_agent"]["jenkins_url"]}/jnlpJars/agent.jar"
+
+# TODO: how to read attributes from chef-osrf plugins into this cookbook
+# swarm_client_version = node['jenkins-plugins']['swarm']
+swarm_client_version = "3.24"
+swarm_client_url = "https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/#{swarm_client_version}/swarm-client-#{swarm_client_version}.jar"
+swarm_client_jarfile_path = "/home/#{agent_username}/swarm-client-#{swarm_client_version}.jar"
+
+# Download swarm client program from url and install it to the jenkins-agent user's home directory.
+remote_file swarm_client_jarfile_path do
+  source swarm_client_url
+  owner agent_username
+  group agent_username
+  mode '0444'
 end
-remote_file "/home/jenkins/jenkins-agent/agent.jar" do
-  source agent_jar_url
+
+jenkins_username = node['osrf_buildfarm']['agent']['username']
+agent_jenkins_user = search('osrf_buildfarm_jenkins_users', "username:#{jenkins_username}").first
+template '/etc/default/jenkins-agent' do
+  source 'jenkins-agent.env.erb'
+  variables Hash[
+    java_args: node['osrf_buildfarm']['agent']['java_args'],
+    jarfile: swarm_client_jarfile_path,
+    jenkins_url: node['osrf_buildfarm']['jenkins_url'],
+    username: jenkins_username,
+    password: agent_jenkins_user['password'],
+    name: node['osrf_buildfarm']['agent']['nodename'],
+    description: node['osrf_buildfarm']['agent']['description'],
+    executors: node['osrf_buildfarm']['agent']['executors'],
+    user_home: agent_homedir,
+    labels: node['osrf_buildfarm']['agent']['labels'],
+  ]
+  notifies :restart, 'service[jenkins-agent]'
+end
+
+template '/etc/systemd/system/jenkins-agent.service' do
+  source 'jenkins-agent.service.erb'
+  variables Hash[
+    service_name: 'jenkins-agent',
+    username: agent_username,
+  ]
+  notifies :run, 'execute[systemctl-daemon-reload]', :immediately
+  notifies :restart, 'service[jenkins-agent]'
+end
+
+execute 'systemctl-daemon-reload' do
+  command 'systemctl daemon-reload'
+  action :nothing
+end
+
+service 'jenkins-agent' do
+  action [:start, :enable]
+  # can not connect to server while testing
+  not_if { node.chef_environment == "test" }
 end
