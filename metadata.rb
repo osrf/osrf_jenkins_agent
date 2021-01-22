@@ -1,10 +1,10 @@
 name "osrf_jenkins_agent"
-maintainer "Steven! Ragnarök"
-maintainer_email "steven@openrobotics.org"
+maintainer "Jose Luis Rivero"
+maintainer_email "jrivero@openrobotics.org"
 license "Apache-2.0"
 description "Configures a Jenkins agent for the OSRF build farm."
 long_description "Configures a Jenkins agent for the OSRF build farm."
-version "0.1.0"
+version "0.1.1"
 chef_version ">= 14.0"
 
 depends "docker"
