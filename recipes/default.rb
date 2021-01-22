@@ -5,7 +5,7 @@
 # Copyright:: 2020, Open Source Robotics Foundation.
 #
 
-agent_username = node['osrf_buildfarm']['agent']['agent_username']
+agent_username = node['osrfbuild']['agent']['agent_username']
 agent_homedir = "/home/#{agent_username}"
 
 apt_update "default" do
@@ -129,21 +129,21 @@ remote_file swarm_client_jarfile_path do
   mode '0444'
 end
 
-jenkins_username = node['osrf_buildfarm']['agent']['username']
-agent_jenkins_user = search('osrf_buildfarm_jenkins_users', "username:#{jenkins_username}").first
+jenkins_username = node['osrfbuild']['agent']['username']
+agent_jenkins_user = search('osrfbuild_jenkins_users', "username:#{jenkins_username}").first
 template '/etc/default/jenkins-agent' do
   source 'jenkins-agent.env.erb'
   variables Hash[
-    java_args: node['osrf_buildfarm']['agent']['java_args'],
+    java_args: node['osrfbuild']['agent']['java_args'],
     jarfile: swarm_client_jarfile_path,
-    jenkins_url: node['osrf_buildfarm']['jenkins_url'],
+    jenkins_url: node['osrfbuild']['jenkins_url'],
     username: jenkins_username,
     password: agent_jenkins_user['password'],
-    name: node['osrf_buildfarm']['agent']['nodename'],
-    description: node['osrf_buildfarm']['agent']['description'],
-    executors: node['osrf_buildfarm']['agent']['executors'],
+    name: node['osrfbuild']['agent']['nodename'],
+    description: node['osrfbuild']['agent']['description'],
+    executors: node['osrfbuild']['agent']['executors'],
     user_home: agent_homedir,
-    labels: node['osrf_buildfarm']['agent']['labels'],
+    labels: node['osrfbuild']['agent']['labels'],
   ]
   notifies :restart, 'service[jenkins-agent]'
 end
