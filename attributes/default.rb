@@ -1,9 +1,9 @@
-default['osrf_buildfarm']['agent']['jenkins_url'] = "https://default_url.org"
-default['osrf_buildfarm']['agent']['agent_username'] = 'default_agent_username'
-default['osrf_buildfarm']['agent']['java_args'] = ''
-default['osrf_buildfarm']['agent']['username'] = 'default_username'
-default['osrf_buildfarm']['agent']['nodename'] = 'default_nodename'
-default['osrf_buildfarm']['agent']['description'] = 'default build agent description'
-default['osrf_buildfarm']['agent']['executors'] = 1
+default['osrfbuild']['agent']['jenkins_url'] = "https://default_url.org"
+default['osrfbuild']['agent']['agent_username'] = 'default_agent_username'
+default['osrfbuild']['agent']['java_args'] = ''
+default['osrfbuild']['agent']['username'] = 'default_username'
+default['osrfbuild']['agent']['nodename'] = 'default_nodename'
+default['osrfbuild']['agent']['description'] = 'default build agent description'
+default['osrfbuild']['agent']['executors'] = 1
 # TODO tags
-default['osrf_buildfarm']['agent']['labels'] = %w(docker)
+default['osrfbuild']['agent']['labels'] = %w(docker)

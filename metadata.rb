@@ -4,7 +4,7 @@ maintainer_email "jrivero@openrobotics.org"
 license "Apache-2.0"
 description "Configures a Jenkins agent for the OSRF build farm."
 long_description "Configures a Jenkins agent for the OSRF build farm."
-version "0.1.1"
+version "0.1.2"
 chef_version ">= 14.0"
 
 depends "docker"
