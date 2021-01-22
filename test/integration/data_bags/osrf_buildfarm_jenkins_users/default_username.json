@@ -1,6 +1,6 @@
 {
-  "id": "admin",
-  "username": "admin",
+  "id": "default_username",
+  "username": "default_username",
   "password": "changeme",
   "public_keys": [],
   "permissions": [
