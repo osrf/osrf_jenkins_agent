@@ -131,7 +131,7 @@ end
 
 # Compose node name. Use ip if hostname is localhost otherwise use localhost
 # value. Add nv intermediate word if gpu is present
-node_base_name = node['hostname'] == 'localhost' ? node['ipaddress'] : node['localhost']
+node_base_name = node['hostname'] == 'localhost' ? node['ipaddress'] : node['hostname']
 node_name = "linux-#{node_base_name}.focal"
 ruby_block 'set node name' do
   block do
