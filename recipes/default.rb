@@ -129,6 +129,17 @@ remote_file swarm_client_jarfile_path do
   mode '0444'
 end
 
+# Compose node name. Use ip if hostname is localhost otherwise use localhost
+# value. Add nv intermediate word if gpu is present
+node_base_name = node['hostname'] == 'localhost' ? node['ipaddress'] : node['hostname']
+node_name = "linux-#{node_base_name}.focal"
+ruby_block 'set node name' do
+  block do
+    node_name = "linux-#{node_base_name}.nv.focal"
+  end
+  only_if "ls /dev/nvidia*"
+end
+
 jenkins_username = node['osrfbuild']['agent']['username']
 agent_jenkins_user = search('osrfbuild_jenkins_users', "username:#{jenkins_username}").first
 template '/etc/default/jenkins-agent' do
@@ -136,10 +147,10 @@ template '/etc/default/jenkins-agent' do
   variables Hash[
     java_args: node['osrfbuild']['agent']['java_args'],
     jarfile: swarm_client_jarfile_path,
-    jenkins_url: node['osrfbuild']['jenkins_url'],
+    jenkins_url: node['osrfbuild']['agent']['jenkins_url'],
     username: jenkins_username,
     password: agent_jenkins_user['password'],
-    name: node['osrfbuild']['agent']['nodename'],
+    name: node_name,
     description: node['osrfbuild']['agent']['description'],
     executors: node['osrfbuild']['agent']['executors'],
     user_home: agent_homedir,
