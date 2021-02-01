@@ -36,10 +36,18 @@ cookbook_file '/etc/X11/xorg.conf' do
   mode "0744"
   not_if "ls /dev/nvidia*"
 end
+# Detecting AWS GRID cards that needs special configuration
+cookbook_file '/etc/X11/xorg.conf' do
+  source 'xorg.conf.nvidia_aws'
+  mode "0744"
+  only_if "lspci | grep '.*NVIDIA.*GRID'"
+end
+# Other NVIDIA cards use generic configuration
 cookbook_file '/etc/X11/xorg.conf' do
   source 'xorg.conf.nvidia'
   mode "0744"
   only_if "ls /dev/nvidia*"
+  not_if "lspci | grep '.*NVIDIA.*GRID'"
 end
 # TODO: assuming :0 here is fragile
 ENV['DISPLAY'] = ':0'
