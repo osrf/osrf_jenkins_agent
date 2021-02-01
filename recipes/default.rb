@@ -149,7 +149,6 @@ template '/etc/default/jenkins-agent' do
     jarfile: swarm_client_jarfile_path,
     jenkins_url: node['osrfbuild']['agent']['jenkins_url'],
     username: jenkins_username,
-    password: agent_jenkins_user['password'],
     name: node_name,
     description: node['osrfbuild']['agent']['description'],
     executors: node['osrfbuild']['agent']['executors'],
@@ -157,6 +156,14 @@ template '/etc/default/jenkins-agent' do
     labels: node['osrfbuild']['agent']['labels'],
   ]
   notifies :restart, 'service[jenkins-agent]'
+end
+
+directory '/etc/jenkins-agent'
+file '/etc/jenkins-agent/token' do
+  content agent_jenkins_user['password']
+  mode '0640'
+  owner 'root'
+  group agent_username
 end
 
 template '/etc/systemd/system/jenkins-agent.service' do
