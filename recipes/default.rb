@@ -157,6 +157,8 @@ template '/etc/default/jenkins-agent' do
     labels: node['osrfbuild']['agent']['labels'],
   ]
   notifies :restart, 'service[jenkins-agent]'
+  owner 'root'
+  mode '0600' # There is a password in the file. Restrict permissions
 end
 
 template '/etc/systemd/system/jenkins-agent.service' do
