@@ -15,7 +15,6 @@ end
 
 # Install docker from docker servers to get latest version supporting nvidia
 # toolkit (at least 19.03)
-include_recipe 'docker'
 docker_installation_package 'default' do
   version '20.10.2'
   action :create
