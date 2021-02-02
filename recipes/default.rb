@@ -23,6 +23,7 @@ end
   mercurial
   ntp
   openjdk-8-jdk-headless
+  pciutils
   qemu-user-static
   sudo
   x11-xserver-utils
@@ -31,10 +32,21 @@ end
   package pkg
 end
 
+# GeForce GTX 550 Ti requires old 3xx.xx series
+package 'nvidia-384' do
+  only_if { has_nvidia_support? }
+end
+
+cookbook_file '/etc/modprobe.d/blacklist-nvidia-nouveau.conf' do
+  source 'blacklist-nvidia-nouveau.conf'
+  mode '0744'
+  only_if { has_nvidia_support? }
+end
+
 cookbook_file '/etc/X11/xorg.conf' do
   source 'xorg.conf.no_gpu'
   mode "0744"
-  not_if "ls /dev/nvidia*"
+  not_if { has_nvidia_support? }
 end
 # Detecting AWS GRID cards that needs special configuration
 cookbook_file '/etc/X11/xorg.conf' do
@@ -46,7 +58,7 @@ end
 cookbook_file '/etc/X11/xorg.conf' do
   source 'xorg.conf.nvidia'
   mode "0744"
-  only_if "ls /dev/nvidia*"
+  only_if { has_nvidia_support? }
   not_if "lspci | grep '.*NVIDIA.*GRID'"
 end
 # TODO: assuming :0 here is fragile
@@ -139,16 +151,22 @@ end
 
 # Compose node name. Use ip if hostname is localhost otherwise use localhost
 # value. Add nv intermediate word if gpu is present
+jenkins_username = node['osrfbuild']['agent']['username']
+node_make_jobs = 3 # TODO: find a better way of handling make_jobs
 node_base_name = node['hostname'] == 'localhost' ? node['ipaddress'] : node['hostname']
+node_labels = node['osrfbuild']['agent']['labels']
 node_name = "linux-#{node_base_name}.focal"
+
 ruby_block 'set node name' do
   block do
     node_name = "linux-#{node_base_name}.nv.focal"
+    # TODO: do not assume nvidia machines are powerful
+    labels.join(["gpu-reliable", "gpu-nvidia", "large-memory", "large-disk"])
+    node_make_jobs = 5
   end
-  only_if "ls /dev/nvidia*"
+  only_if { has_nvidia_support? }
 end
 
-jenkins_username = node['osrfbuild']['agent']['username']
 agent_jenkins_user = search('osrfbuild_jenkins_users', "username:#{jenkins_username}").first
 template '/etc/default/jenkins-agent' do
   source 'jenkins-agent.env.erb'
@@ -157,14 +175,22 @@ template '/etc/default/jenkins-agent' do
     jarfile: swarm_client_jarfile_path,
     jenkins_url: node['osrfbuild']['agent']['jenkins_url'],
     username: jenkins_username,
-    password: agent_jenkins_user['password'],
     name: node_name,
     description: node['osrfbuild']['agent']['description'],
     executors: node['osrfbuild']['agent']['executors'],
     user_home: agent_homedir,
-    labels: node['osrfbuild']['agent']['labels'],
+    labels: node_labels,
+    make_jobs: node_make_jobs,
   ]
   notifies :restart, 'service[jenkins-agent]'
+end
+
+directory '/etc/jenkins-agent'
+file '/etc/jenkins-agent/token' do
+  content agent_jenkins_user['password']
+  mode '0640'
+  owner 'root'
+  group agent_username
 end
 
 template '/etc/systemd/system/jenkins-agent.service' do
