@@ -8,7 +8,7 @@ module OSRFJenkinsAgent
     #
     # @return [Boolean]
     def has_nvidia_support?
-      shell_out!('lspci').include?('VGA.*NVIDIA')
+      shell_out('lspci').stdout.match?(/VGA.*NVIDIA/)
     end
   end
 end
