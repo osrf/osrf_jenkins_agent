@@ -23,6 +23,7 @@ end
   mercurial
   ntp
   openjdk-8-jdk-headless
+  pciutils
   qemu-user-static
   sudo
   x11-xserver-utils
