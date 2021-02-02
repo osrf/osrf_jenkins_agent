@@ -35,7 +35,6 @@ end
 
 %w[
   default-jre-headless
-  docker
   gnupg2
   groovy
   libffi-dev
