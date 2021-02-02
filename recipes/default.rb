@@ -13,9 +13,14 @@ apt_update "default" do
   frequency 3600
 end
 
+# Install docker from docker servers to get latest version supporting nvidia
+# toolkit (at least 19.03)
+docker_installation_package 'default' do
+  version '20.10.2'
+  action :create
+end
 %w[
   default-jre-headless
-  docker.io
   gnupg2
   groovy
   libffi-dev
@@ -30,6 +35,19 @@ end
   wget
 ].each do |pkg|
   package pkg
+end
+
+apt_repository 'nvidia-docker' do
+  uri 'https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list'
+  key ['https://nvidia.github.io/nvidia-docker/gpgkey']
+  action :add
+  only_if { has_nvidia_support? }
+end
+
+# install nvidia-docker2 is recommended although real support is via
+# container-toolkit
+package "nvidia-docker2" do
+  only_if { has_nvidia_support? }
 end
 
 # GeForce GTX 550 Ti requires old 3xx.xx series
