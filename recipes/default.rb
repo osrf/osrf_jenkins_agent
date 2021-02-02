@@ -24,13 +24,13 @@ apt_repository 'nvidia-docker' do
   uri 'https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list'
   key ['https://nvidia.github.io/nvidia-docker/gpgkey']
   action :add
-  only_if 'lspci | grep VGA.*NVIDIA'
+  only_if { has_nvidia_support? }
 end
 
 # install nvidia-docker2 is recommended although real support is via
 # container-toolkit
 package "nvidia-docker2" do
-  only_if 'lspci | grep VGA.*NVIDIA'
+  only_if { has_nvidia_support? }
 end
 
 %w[
