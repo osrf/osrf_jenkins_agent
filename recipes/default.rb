@@ -131,16 +131,22 @@ end
 
 # Compose node name. Use ip if hostname is localhost otherwise use localhost
 # value. Add nv intermediate word if gpu is present
+jenkins_username = node['osrfbuild']['agent']['username']
+node_make_jobs = 3 # TODO: find a better way of handling make_jobs
 node_base_name = node['hostname'] == 'localhost' ? node['ipaddress'] : node['hostname']
+node_labels = node['osrfbuild']['agent']['labels']
 node_name = "linux-#{node_base_name}.focal"
+
 ruby_block 'set node name' do
   block do
     node_name = "linux-#{node_base_name}.nv.focal"
+    # TODO: do not assume nvidia machines are powerful
+    labels.join(["gpu-reliable", "gpu-nvidia", "large-memory", "large-disk"])
+    node_make_jobs = 5
   end
   only_if "ls /dev/nvidia*"
 end
 
-jenkins_username = node['osrfbuild']['agent']['username']
 agent_jenkins_user = search('osrfbuild_jenkins_users', "username:#{jenkins_username}").first
 template '/etc/default/jenkins-agent' do
   source 'jenkins-agent.env.erb'
@@ -153,7 +159,8 @@ template '/etc/default/jenkins-agent' do
     description: node['osrfbuild']['agent']['description'],
     executors: node['osrfbuild']['agent']['executors'],
     user_home: agent_homedir,
-    labels: node['osrfbuild']['agent']['labels'],
+    labels: node_labels,
+    make_jobs: node_make_jobs,
   ]
   notifies :restart, 'service[jenkins-agent]'
 end
