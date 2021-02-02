@@ -7,5 +7,4 @@ long_description "Configures a Jenkins agent for the OSRF build farm."
 version "0.1.3"
 chef_version ">= 14.0"
 
-# "=4.6.7" # In sync with chef-osrf private configurations
 depends "docker"
