@@ -8,6 +8,10 @@
 agent_username = node['osrfbuild']['agent']['agent_username']
 agent_homedir = "/home/#{agent_username}"
 
+def has_nvidia_support
+  shell_out!('lspci').include?('VGA.*NVIDIA')
+end
+
 apt_update "default" do
   action :periodic
   frequency 3600
@@ -34,24 +38,24 @@ end
 
 # GeForce GTX 550 Ti requires old 3xx.xx series
 package 'nvidia-384' do
-  only_if 'lspci | grep VGA.*NVIDIA'
+  only_if { has_nvidia_support() }
 end
 
 cookbook_file '/etc/modprobe.d/blacklist-nvidia-nouveau.conf' do
   source 'blacklist-nvidia-nouveau.conf'
   mode '0744'
-  only_if 'lspci | grep VGA.*NVIDIA'
+  only_if { has_nvidia_support() }
 end
 
 cookbook_file '/etc/X11/xorg.conf' do
   source 'xorg.conf.no_gpu'
   mode "0744"
-  not_if 'lspci | grep VGA.*NVIDIA'
+  not_if { has_nvidia_support() }
 end
 cookbook_file '/etc/X11/xorg.conf' do
   source 'xorg.conf.nvidia'
   mode "0744"
-  only_if 'lspci | grep VGA.*NVIDIA'
+  only_if { has_nvidia_support() }
 end
 # TODO: assuming :0 here is fragile
 ENV['DISPLAY'] = ':0'
@@ -149,7 +153,7 @@ ruby_block 'set node name' do
   block do
     node_name = "linux-#{node_base_name}.nv.focal"
   end
-  only_if 'lspci | grep VGA.*NVIDIA'
+  only_if { has_nvidia_support() }
 end
 
 jenkins_username = node['osrfbuild']['agent']['username']
