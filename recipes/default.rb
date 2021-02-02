@@ -52,14 +52,14 @@ end
 cookbook_file '/etc/X11/xorg.conf' do
   source 'xorg.conf.nvidia_aws'
   mode "0744"
-  only_if "lspci | grep '.*NVIDIA.*GRID'"
+  only_if { has_nvidia_grid_support? }
 end
 # Other NVIDIA cards use generic configuration
 cookbook_file '/etc/X11/xorg.conf' do
   source 'xorg.conf.nvidia'
   mode "0744"
   only_if { has_nvidia_support? }
-  not_if "lspci | grep '.*NVIDIA.*GRID'"
+  not_if { has_nvidia_grid_support? }
 end
 # TODO: assuming :0 here is fragile
 ENV['DISPLAY'] = ':0'
