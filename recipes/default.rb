@@ -8,10 +8,6 @@
 agent_username = node['osrfbuild']['agent']['agent_username']
 agent_homedir = "/home/#{agent_username}"
 
-def has_nvidia_support
-  shell_out!('lspci').include?('VGA.*NVIDIA')
-end
-
 apt_update "default" do
   action :periodic
   frequency 3600
