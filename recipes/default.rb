@@ -40,7 +40,7 @@ end
 cookbook_file '/etc/modprobe.d/blacklist-nvidia-nouveau.conf' do
   source 'blacklist-nvidia-nouveau.conf'
   mode '0744'
-  not_if 'lspci | grep VGA.*NVIDIA'
+  only_if 'lspci | grep VGA.*NVIDIA'
 end
 
 cookbook_file '/etc/X11/xorg.conf' do
