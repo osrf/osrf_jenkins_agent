@@ -4,6 +4,9 @@ name: ci
 "on":
   pull_request:
   push:
+    branches:
+      - latest
+
 
 jobs:
   yamllint:
@@ -58,11 +61,11 @@ jobs:
             set -x
             KITCHEN_LOCAL_YAML=kitchen.dokken.yml /usr/bin/kitchen exec \
                 ${{ matrix.suite }}-${{ matrix.os }} \
-                -c "systemctl status lightdm"
+                -c "journalctl -u lightdm"
       - name: Print debug output on failure (systemctl jenkins-agent status)
         if: failure()
         run: |
             set -x
             KITCHEN_LOCAL_YAML=kitchen.dokken.yml /usr/bin/kitchen exec \
                 ${{ matrix.suite }}-${{ matrix.os }} \
-                -c "systemctl status jenkins-agent"
+                -c "journalctl -u jenkins-agent"
