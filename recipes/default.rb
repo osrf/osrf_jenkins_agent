@@ -104,7 +104,7 @@ ruby_block "Ensure display-setup-script" do
 end
 
 # set lightdm as the display manager requires 3 commands
-execute 'set-lighdm-display-manager debconf' do
+execute 'set-lightdm-display-manager debconf' do
   command 'echo set shared/default-x-display-manager lightdm | debconf-communicate'
   not_if 'grep lightdm /etc/X11/default-display-manager'
 end
