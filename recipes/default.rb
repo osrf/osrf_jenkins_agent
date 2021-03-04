@@ -5,7 +5,7 @@
 # Copyright:: 2020, Open Source Robotics Foundation.
 #
 
-agent_username = node['osrf_buildfarm']['agent']['agent_username']
+agent_username = node['osrfbuild']['agent']['agent_username']
 agent_homedir = "/home/#{agent_username}"
 
 apt_update "default" do
