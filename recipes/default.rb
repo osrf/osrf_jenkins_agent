@@ -5,8 +5,8 @@
 # Copyright:: 2020, Open Source Robotics Foundation.
 #
 
-agent_username = node['osrfbuild']['agent']['agent_username']
-agent_homedir = "/home/#{agent_username}"
+linux_username = node['osrfbuild']['agent']['linux_username']
+agent_homedir = "/home/#{linux_username}"
 
 apt_update "default" do
   action :periodic
@@ -135,12 +135,12 @@ service "squid-deb-proxy" do
   action [:start, :enable]
 end
 
-user agent_username  do
+user linux_username  do
   shell "/bin/bash"
   manage_home true
 end
-sudo agent_username do
-  user agent_username
+sudo linux_username do
+  user linux_username
   nopasswd true
 end
 
@@ -148,7 +148,7 @@ end
 # containers.
 group 'docker' do
   append true
-  members agent_username
+  members linux_username
   action :manage # Group should be created by docker package.
 end
 
@@ -157,13 +157,13 @@ end
 # swarm_client_version = node['jenkins-plugins']['swarm']
 swarm_client_version = "3.24"
 swarm_client_url = "https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/#{swarm_client_version}/swarm-client-#{swarm_client_version}.jar"
-swarm_client_jarfile_path = "/home/#{agent_username}/swarm-client-#{swarm_client_version}.jar"
+swarm_client_jarfile_path = "/home/#{linux_username}/swarm-client-#{swarm_client_version}.jar"
 
 # Download swarm client program from url and install it to the jenkins-agent user's home directory.
 remote_file swarm_client_jarfile_path do
   source swarm_client_url
-  owner agent_username
-  group agent_username
+  owner linux_username
+  group linux_username
   mode '0444'
 end
 
@@ -208,14 +208,14 @@ file '/etc/jenkins-agent/token' do
   content agent_jenkins_user['password']
   mode '0640'
   owner 'root'
-  group agent_username
+  group linux_username
 end
 
 template '/etc/systemd/system/jenkins-agent.service' do
   source 'jenkins-agent.service.erb'
   variables Hash[
     service_name: 'jenkins-agent',
-    username: agent_username,
+    username: linux_username,
   ]
   notifies :run, 'execute[systemctl-daemon-reload]', :immediately
   notifies :restart, 'service[jenkins-agent]'

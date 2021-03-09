@@ -3,7 +3,7 @@ control 'agent_user' do
   impact 'critical'
   title 'User jenkins should present in the system'
   # attributes are not directly accesible from inspec. Hardcoding user here
-  describe user('default_agent_username') do
+  describe user('default_linux_username') do
     it { should exist }
   end
 end
