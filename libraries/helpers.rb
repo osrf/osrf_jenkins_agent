@@ -8,6 +8,9 @@ module OSRFJenkinsAgent
     #
     # @return [Boolean]
     def has_nvidia_support?
+      if ENV["_TEST_FAKE_NVIDIA_SUPPORT_"]
+          True
+      end
       shell_out('lspci').stdout.match?(/VGA.*NVIDIA/)
     end
 

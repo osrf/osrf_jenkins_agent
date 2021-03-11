@@ -26,6 +26,9 @@ jobs:
         chef_version:
           - '15'
           - '16'
+        nvidia_support:
+          - True
+          - False
       fail-fast: false
     steps:
       - name: check out code
@@ -41,6 +44,7 @@ jobs:
           CHEF_LICENSE: accept-no-persist
           CHEF_VERSION: ${{ matrix.chef_version }}
           KITCHEN_LOCAL_YAML: kitchen.dokken.yml
+          _TEST_FAKE_NVIDIA_SUPPORT_: ${{ matrix.nvidia_support }}
       - name: Print debug output (lightdm)
         if: failure()
         run: |
