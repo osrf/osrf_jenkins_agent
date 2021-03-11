@@ -15,11 +15,11 @@ jobs:
       - name: check out code
         uses: actions/checkout@master
       - name: run yaml lint
-        uses: actionshub/yamllint@master
+        uses: actionshub/yamllint@main
   test:
     runs-on: ubuntu-20.04
-    name: 20.04 (${{ matrix.suite }}, \
-          chef ${{ matrix.chef_version }}, \
+    name: 20.04 (${{ matrix.suite }} \
+          chef ${{ matrix.chef_version }} \
           fake-nvidia ${{ matrix.nvidia_support }})
     strategy:
       matrix:
@@ -29,8 +29,8 @@ jobs:
           - '15'
           - '16'
         nvidia_support:
-          - True
-          - False
+          - true
+          - false
       fail-fast: false
     steps:
       - name: check out code
