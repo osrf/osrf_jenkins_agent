@@ -173,17 +173,14 @@ end
 jenkins_username = node['osrfbuild']['agent']['username']
 node_make_jobs = 3 # TODO: find a better way of handling make_jobs
 node_base_name = node['hostname'] == 'localhost' ? node['ipaddress'] : node['hostname']
-node_labels = node['osrfbuild']['agent']['labels']
+node_labels = [ node['osrfbuild']['agent']['labels'] ]
 node_name = "linux-#{node_base_name}.focal"
 
-ruby_block 'set node name' do
-  block do
+if has_nvidia_support?
     node_name = "linux-#{node_base_name}.nv.focal"
     # TODO: do not assume nvidia machines are powerful
-    labels.join(["gpu-reliable", "gpu-nvidia", "large-memory", "large-disk"])
+    node_labels += ["gpu-reliable", "gpu-nvidia", "large-memory", "large-disk"]
     node_make_jobs = 5
-  end
-  only_if { has_nvidia_support? }
 end
 
 agent_jenkins_user = search('osrfbuild_jenkins_users', "username:#{jenkins_username}").first
@@ -198,7 +195,7 @@ template '/etc/default/jenkins-agent' do
     description: node['osrfbuild']['agent']['description'],
     executors: node['osrfbuild']['agent']['executors'],
     user_home: agent_homedir,
-    labels: node_labels,
+    labels: node_labels.join(' '),
     make_jobs: node_make_jobs,
   ]
   notifies :restart, 'service[jenkins-agent]'
