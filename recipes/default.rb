@@ -38,8 +38,9 @@ end
 end
 
 apt_repository 'nvidia-docker' do
-  uri 'https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list'
+  uri 'https://nvidia.github.io/nvidia-docker/focal/nvidia-docker.list'
   key ['https://nvidia.github.io/nvidia-docker/gpgkey']
+  components ['main']
   action :add
   only_if { has_nvidia_support? }
 end
