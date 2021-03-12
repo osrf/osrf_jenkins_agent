@@ -6,14 +6,12 @@ name: ci
   push:
     branches:
       - latest
-
-
 jobs:
   yamllint:
     runs-on: ubuntu-latest
     steps:
       - name: check out code
-        uses: actions/checkout@master
+        uses: actions/checkout@main
       - name: run yaml lint
         uses: actionshub/yamllint@master
   test:
@@ -32,6 +30,8 @@ jobs:
         uses: actions/checkout@master
       - name: install chef
         uses: actionshub/chef-install@master
+      - name: Install pciutils
+        run: sudo apt-get -y install pciutils
       - name: test-kitchen
         uses: actionshub/test-kitchen@master
         with:
