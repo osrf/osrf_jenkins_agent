@@ -10,9 +10,7 @@ module OSRFJenkinsAgent
     def has_nvidia_support?
       puts('inside nvidia_support')
       puts("ENV: #{ENV['TEST_FAKE_NVIDIA_SUPPORT']}")
-      puts("HOME: #{ENV['HOME']}")
-      puts(ENV['CHEF_LICENSE'])
-      if ENV["TEST_FAKE_NVIDIA_SUPPORT"]
+      if ENV["TEST_FAKE_NVIDIA_SUPPORT"] == 'true'
         puts('working!')
         return true
       end
