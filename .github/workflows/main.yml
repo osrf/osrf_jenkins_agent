@@ -1,5 +1,5 @@
 ---
-name: ci
+name: main
 
 "on":
   pull_request:
@@ -36,7 +36,7 @@ jobs:
       - name: check out code
         uses: actions/checkout@master
       - name: install chef
-        uses: actionshub/chef-install@master
+        uses: actionshub/chef-install@main
       - name: test-kitchen
         uses: actionshub/test-kitchen@master
         with:
