@@ -8,13 +8,13 @@ module OSRFJenkinsAgent
     #
     # @return [Boolean]
     def has_nvidia_support?
-      Chef::Log.debug('inside nvidia_support')
-      Chef::Log.debug("ENV: #{ENV['_TEST_FAKE_NVIDIA_SUPPORT_']}")
+      puts('inside nvidia_support')
+      puts("ENV: #{ENV['_TEST_FAKE_NVIDIA_SUPPORT_']}")
       if ENV["_TEST_FAKE_NVIDIA_SUPPORT_"]
-        Chef::Log.debug('inside nvidia_support')
+        puts('inside nvidia_support')
         return true
       end
-      Chef::Log.debug('lspci run')
+      puts('lspci run')
       shell_out('lspci').stdout.match?(/VGA.*NVIDIA/)
     end
 
