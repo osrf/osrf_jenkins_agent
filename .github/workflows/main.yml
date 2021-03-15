@@ -1,5 +1,5 @@
 ---
-name: ci
+name: main
 
 "on":
   pull_request:
@@ -15,10 +15,12 @@ jobs:
       - name: check out code
         uses: actions/checkout@master
       - name: run yaml lint
-        uses: actionshub/yamllint@master
+        uses: actionshub/yamllint@main
   test:
     runs-on: ubuntu-20.04
-    name: ubuntu 20.04
+    name: 20.04 (${{ matrix.suite }} \
+          chef ${{ matrix.chef_version }} \
+          fake-nvidia ${{ matrix.nvidia_support }})
     strategy:
       matrix:
         suite:
@@ -26,12 +28,15 @@ jobs:
         chef_version:
           - '15'
           - '16'
+        nvidia_support:
+          - true
+          - false
       fail-fast: false
     steps:
       - name: check out code
         uses: actions/checkout@master
       - name: install chef
-        uses: actionshub/chef-install@master
+        uses: actionshub/chef-install@main
       - name: test-kitchen
         uses: actionshub/test-kitchen@master
         with:
@@ -41,6 +46,7 @@ jobs:
           CHEF_LICENSE: accept-no-persist
           CHEF_VERSION: ${{ matrix.chef_version }}
           KITCHEN_LOCAL_YAML: kitchen.dokken.yml
+          CHEF_TEST_FAKE_NVIDIA_SUPPORT: ${{ matrix.nvidia_support }}
       - name: Print debug output (lightdm)
         if: failure()
         run: |
