@@ -9,7 +9,9 @@ module OSRFJenkinsAgent
     # @return [Boolean]
     def has_nvidia_support?
       puts('inside nvidia_support')
-      puts("ENV: #{ENV['TEST_FAKE_NVIDIA_SUPPORT']}")
+      puts (ENV['TEST_2'])
+      puts("ENV:")
+      puts (ENV['TEST_FAKE_NVIDIA_SUPPORT'])
       if ENV["TEST_FAKE_NVIDIA_SUPPORT"] == 'true'
         puts('working!')
         return true

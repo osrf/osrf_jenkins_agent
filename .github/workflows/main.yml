@@ -47,6 +47,7 @@ jobs:
           CHEF_VERSION: ${{ matrix.chef_version }}
           KITCHEN_LOCAL_YAML: kitchen.dokken.yml
           TEST_FAKE_NVIDIA_SUPPORT: ${{ matrix.nvidia_support }}
+          TEST_2: 'true'
       - name: Print debug output (lightdm)
         if: failure()
         run: |
