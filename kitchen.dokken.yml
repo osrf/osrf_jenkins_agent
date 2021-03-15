@@ -6,7 +6,8 @@ driver:
   privileged: true
   env:
     - CHEF_LICENSE=accept
-    - CHEF_TEST_FAKE_NVIDIA_SUPPORT=<%= ENV['CHEF_TEST_FAKE_NVIDIA_SUPPORT'] || false %>
+    - CHEF_TEST_FAKE_NVIDIA_SUPPORT=\
+        <%= ENV['CHEF_TEST_FAKE_NVIDIA_SUPPORT'] || false %>
 
 transport:
   name: dokken
