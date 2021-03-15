@@ -29,8 +29,8 @@ jobs:
           - '15'
           - '16'
         nvidia_support:
-          - 'true'
-          - 'false'
+          - true
+          - false
       fail-fast: false
     steps:
       - name: check out code
