@@ -38,7 +38,7 @@ end
 end
 
 apt_repository 'nvidia-docker' do
-  uri 'https://nvidia.github.io/nvidia-docker/focal/nvidia-docker.list'
+  uri 'https://nvidia.github.io/nvidia-docker/ubuntu20.04/nvidia-docker.list'
   key ['https://nvidia.github.io/nvidia-docker/gpgkey']
   components ['main']
   action :add
