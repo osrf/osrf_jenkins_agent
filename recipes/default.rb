@@ -37,12 +37,17 @@ end
   package pkg
 end
 
-apt_repository 'nvidia-docker' do
-  uri 'https://nvidia.github.io/nvidia-docker/ubuntu20.04/nvidia-docker.list'
-  key ['https://nvidia.github.io/nvidia-docker/gpgkey']
-  components ['main']
-  action :add
-  only_if { has_nvidia_support? }
+# Focal uses 18.04 repository
+for repo_uri in ['https://nvidia.github.io/libnvidia-container/stable/ubuntu18.04/$(ARCH)',
+                'https://nvidia.github.io/nvidia-container-runtime/stable/ubuntu18.04/$(ARCH)',
+                'https://nvidia.github.io/nvidia-docker/ubuntu18.04/$(ARCH)'] do
+    apt_repository "nvidia-docker#{repo_uri.hash}" do
+    uri repo_uri
+    key ['https://nvidia.github.io/nvidia-docker/gpgkey']
+    components ['main']
+    action :add
+    only_if { has_nvidia_support? }
+  end
 end
 
 # install nvidia-docker2 is recommended although real support is via
