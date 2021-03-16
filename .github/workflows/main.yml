@@ -6,14 +6,12 @@ name: main
   push:
     branches:
       - latest
-
-
 jobs:
   yamllint:
     runs-on: ubuntu-latest
     steps:
       - name: check out code
-        uses: actions/checkout@master
+        uses: actions/checkout@main
       - name: run yaml lint
         uses: actionshub/yamllint@main
   test:

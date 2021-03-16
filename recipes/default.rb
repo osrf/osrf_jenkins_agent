@@ -37,11 +37,17 @@ end
   package pkg
 end
 
-apt_repository 'nvidia-docker' do
-  uri 'https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list'
-  key ['https://nvidia.github.io/nvidia-docker/gpgkey']
-  action :add
-  only_if { has_nvidia_support? }
+# Focal uses 18.04 repository
+for repo_uri in ['https://nvidia.github.io/libnvidia-container/stable/ubuntu18.04/$(ARCH)',
+                'https://nvidia.github.io/nvidia-container-runtime/stable/ubuntu18.04/$(ARCH)',
+                'https://nvidia.github.io/nvidia-docker/ubuntu18.04/$(ARCH)'] do
+  apt_repository "nvidia-docker#{repo_uri.hash}" do
+    uri repo_uri
+    distribution '/'
+    key ['https://nvidia.github.io/nvidia-docker/gpgkey']
+    action :add
+    only_if { has_nvidia_support? }
+  end
 end
 
 # install nvidia-docker2 is recommended although real support is via
@@ -172,17 +178,14 @@ end
 jenkins_username = node['osrfbuild']['agent']['username']
 node_make_jobs = 3 # TODO: find a better way of handling make_jobs
 node_base_name = node['hostname'] == 'localhost' ? node['ipaddress'] : node['hostname']
-node_labels = node['osrfbuild']['agent']['labels']
+node_labels = [ node['osrfbuild']['agent']['labels'] ]
 node_name = "linux-#{node_base_name}.focal"
 
-ruby_block 'set node name' do
-  block do
+if has_nvidia_support?
     node_name = "linux-#{node_base_name}.nv.focal"
     # TODO: do not assume nvidia machines are powerful
-    labels.join(["gpu-reliable", "gpu-nvidia", "large-memory", "large-disk"])
+    node_labels += ["gpu-reliable", "gpu-nvidia", "large-memory", "large-disk"]
     node_make_jobs = 5
-  end
-  only_if { has_nvidia_support? }
 end
 
 agent_jenkins_user = search('osrfbuild_jenkins_users', "username:#{jenkins_username}").first
@@ -197,7 +200,7 @@ template '/etc/default/jenkins-agent' do
     description: node['osrfbuild']['agent']['description'],
     executors: node['osrfbuild']['agent']['executors'],
     user_home: agent_homedir,
-    labels: node_labels,
+    labels: node_labels.join(' '),
     make_jobs: node_make_jobs,
   ]
   notifies :restart, 'service[jenkins-agent]'
