@@ -35,8 +35,6 @@ jobs:
         uses: actions/checkout@master
       - name: install chef
         uses: actionshub/chef-install@main
-      - name: Install pciutils
-        run: sudo apt-get -y install pciutils
       - name: test-kitchen
         uses: actionshub/test-kitchen@master
         with:
