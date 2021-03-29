@@ -88,6 +88,14 @@ end
 # TODO: assuming :0 here is fragile
 ENV['DISPLAY'] = ':0'
 
+# gdm3 systemctl delete the display-manager systemctl when disabled
+# be sure of installing lightdm after this and not before
+service "gdm3" do
+  action [:start, :disable]
+  only_if { 'systemctl is-enabled gdm3.service' }
+  only_if { has_nvidia_support? }
+end
+
 package "lightdm"
 cookbook_file "/etc/lightdm/xhost.sh" do
   source "lightdm/xhost.sh"
