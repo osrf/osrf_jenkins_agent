@@ -8,6 +8,7 @@ module OSRFJenkinsAgent
     #
     # @return [Boolean]
     def has_nvidia_support?
+
       if ENV['CHEF_TEST_FAKE_NVIDIA_SUPPORT'] == 'true'
         return true
       end
