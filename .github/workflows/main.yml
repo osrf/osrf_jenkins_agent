@@ -43,7 +43,6 @@ jobs:
           CHEF_LICENSE: accept-no-persist
           CHEF_VERSION: ${{ matrix.chef_version }}
           KITCHEN_LOCAL_YAML: kitchen.dokken.yml
-          _TEST_FAKE_NVIDIA_SUPPORT_: ${{ matrix.nvidia_support }}
           CHEF_TEST_FAKE_NVIDIA_SUPPORT: ${{ matrix.nvidia_support }}
       - name: Print debug output (lightdm)
         if: failure()
