@@ -24,7 +24,6 @@ jobs:
         suite:
           - 'agent'
         chef_version:
-          - '15'
           - '16'
         nvidia_support:
           - true
@@ -32,7 +31,7 @@ jobs:
       fail-fast: false
     steps:
       - name: check out code
-        uses: actions/checkout@3.0.0
+        uses: actions/checkout@v3.0.0
       - name: install chef
         uses: actionshub/chef-install@main
       - name: test-kitchen
