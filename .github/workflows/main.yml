@@ -1,19 +1,17 @@
 ---
-name: ci
+name: main
 
 "on":
   pull_request:
   push:
     branches:
       - latest
-
-
 jobs:
   yamllint:
     runs-on: ubuntu-latest
     steps:
       - name: check out code
-        uses: actions/checkout@master
+        uses: actions/checkout@main
       - name: run yaml lint
         uses: actionshub/yamllint@main
   test:
@@ -34,11 +32,11 @@ jobs:
       fail-fast: false
     steps:
       - name: check out code
-        uses: actions/checkout@master
+        uses: actions/checkout@3.0.0
       - name: install chef
-        uses: actionshub/chef-install@master
+        uses: actionshub/chef-install@main
       - name: test-kitchen
-        uses: actionshub/test-kitchen@master
+        uses: actionshub/test-kitchen@2.0.0
         with:
           suite: ${{ matrix.suite }}
           os: 'ubuntu-2004'
@@ -47,6 +45,7 @@ jobs:
           CHEF_VERSION: ${{ matrix.chef_version }}
           KITCHEN_LOCAL_YAML: kitchen.dokken.yml
           _TEST_FAKE_NVIDIA_SUPPORT_: ${{ matrix.nvidia_support }}
+          CHEF_TEST_FAKE_NVIDIA_SUPPORT: ${{ matrix.nvidia_support }}
       - name: Print debug output (lightdm)
         if: failure()
         run: |
