@@ -32,11 +32,11 @@ jobs:
       fail-fast: false
     steps:
       - name: check out code
-        uses: actions/checkout@master
+        uses: actions/checkout@3.0.0
       - name: install chef
         uses: actionshub/chef-install@main
       - name: test-kitchen
-        uses: actionshub/test-kitchen@master
+        uses: actionshub/test-kitchen@2.0.0
         with:
           suite: ${{ matrix.suite }}
           os: 'ubuntu-2004'
