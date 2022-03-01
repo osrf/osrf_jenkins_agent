@@ -24,7 +24,6 @@ jobs:
         suite:
           - 'agent'
         chef_version:
-          - '15'
           - '16'
         nvidia_support:
           - true
