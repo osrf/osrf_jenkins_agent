@@ -152,6 +152,7 @@ end
 
 user linux_username  do
   shell "/bin/bash"
+  home "#{agent_homedir}"
   manage_home true
 end
 sudo linux_username do
@@ -172,7 +173,7 @@ end
 # swarm_client_version = node['jenkins-plugins']['swarm']
 swarm_client_version = "3.24"
 swarm_client_url = "https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/#{swarm_client_version}/swarm-client-#{swarm_client_version}.jar"
-swarm_client_jarfile_path = "/home/#{linux_username}/swarm-client-#{swarm_client_version}.jar"
+swarm_client_jarfile_path = "#{agent_homedir}/swarm-client-#{swarm_client_version}.jar"
 
 # Download swarm client program from url and install it to the jenkins-agent user's home directory.
 remote_file swarm_client_jarfile_path do
