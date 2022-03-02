@@ -93,7 +93,7 @@ ENV['DISPLAY'] = ':0'
 # be sure of installing lightdm after this and not before
 service "gdm3" do
   action [:start, :disable]
-  only_if { 'systemctl is-enabled gdm3.service' }
+  only_if { node['packages'].keys.include? "gdm3" }
   only_if { has_nvidia_support? }
 end
 
