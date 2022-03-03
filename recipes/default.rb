@@ -96,6 +96,16 @@ service "gdm3" do
   only_if { has_nvidia_support? }
 end
 
+# lightdm seems to need unity-greeter and remove ubuntu-session to work out-of-the-box
+# see: https://github.com/osrf/osrf_jenkins_agent/issues/25
+package 'unity-greeter' do
+  only_if { has_nvidia_support? }
+end
+package 'ubuntu-session' do
+  only_if { has_nvidia_support? }
+  action :purge
+end
+
 package "lightdm"
 cookbook_file "/etc/lightdm/xhost.sh" do
   source "lightdm/xhost.sh"
