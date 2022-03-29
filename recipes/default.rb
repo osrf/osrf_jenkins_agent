@@ -13,12 +13,13 @@ apt_update "default" do
   frequency 3600
 end
 
-# Install docker from docker servers to get latest version supporting nvidia
-# toolkit (at least 19.03)
+# Problems with seccomp policy and Ubuntu Jammy images require at least version 20.10.12
+# More info at: https://github.com/ignition-tooling/release-tools/issues/654#issue-1162900579
 docker_installation_package 'default' do
-  version '20.10.2'
+  version '20.10.12'
   action :create
 end
+
 %w[
   default-jre-headless
   gnupg2
