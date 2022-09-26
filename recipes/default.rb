@@ -28,7 +28,6 @@ end
   libssl-dev
   mercurial
   ntp
-  openjdk-8-jdk-headless
   pciutils
   qemu-user-static
   sudo
