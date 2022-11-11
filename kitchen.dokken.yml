@@ -40,7 +40,7 @@ suites:
       inspec_tests:
         - test/integration/agent
         - test/integration/x11_support
-  - name: agent_only
+  - name: agent-only
     data_bags_path: "test/integration/data_bags"
     run_list:
       - recipe[osrf_jenkins_agent]

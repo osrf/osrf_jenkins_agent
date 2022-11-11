@@ -1,5 +1,7 @@
 # Set of tools for the buildfarm Linux Build Agents
 
+linux_username = node['osrfbuild']['agent']['linux_username']
+
 # Problems with seccomp policy and Ubuntu Jammy images require at least version 20.10.12
 # More info at: https://github.com/ignition-tooling/release-tools/issues/654#issue-1162900579
 docker_installation_package 'default' do

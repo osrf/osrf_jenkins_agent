@@ -23,7 +23,7 @@ jobs:
       matrix:
         suite:
           - 'agent'
-          - 'agent_only'
+          - 'agent-only'
         chef_version:
           - '16'
           - '17'
@@ -31,7 +31,7 @@ jobs:
           - true
           - false
         exclude:
-          - suite: 'agent_only'
+          - suite: 'agent-only'
             nvidia_support: true
       fail-fast: false
     steps:
