@@ -23,6 +23,7 @@ jobs:
       matrix:
         suite:
           - 'agent'
+          - 'agent_only'
         chef_version:
           - '16'
           - '17'
