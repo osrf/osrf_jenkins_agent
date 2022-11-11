@@ -25,9 +25,8 @@ end
 
 package 'default-jre-headless'
 
-if default['osrfbuild']['agent']['install_agent_build_setup']
-  include ""agent_build_tools
-end
+puts node['osrfbuild']['agent']['install_agent_build_setup']
+include_recipe 'osrf_jenkins_agent::agent_build_tools' if node['osrfbuild']['agent']['install_agent_build_setup']
 
 # TODO: how to read attributes from chef-osrf plugins into this cookbook
 # swarm_client_version = node['jenkins-plugins']['swarm']
