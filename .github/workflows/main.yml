@@ -30,6 +30,9 @@ jobs:
         nvidia_support:
           - true
           - false
+        exclude:
+          - suite: 'agent_only'
+            nvidia_support: true
       fail-fast: false
     steps:
       - name: check out code
