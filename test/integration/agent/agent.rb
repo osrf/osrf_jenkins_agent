@@ -1,4 +1,3 @@
-# InSpec test for recipe osrf_jenkins_agent::default
 control 'agent_user' do
   impact 'critical'
   title 'User jenkins should present in the system'
@@ -24,13 +23,5 @@ control 'jenkins-agent' do
     # imposible to connect to server in tests, should not be up
     it { should_not be_enabled }
     it { should_not be_running }
-  end
-end
-
-control 'no-x11-packages' do
-  impact 'low'
-  title 'Check that the system does not contain X11 packages'
-  describe service('lightdm') do
-    it { should_not be_installed }
   end
 end

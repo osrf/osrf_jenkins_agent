@@ -51,3 +51,4 @@ suites:
     verifier:
       inspec_tests:
         - test/integration/agent
+        - test/integration/x11_no_support
