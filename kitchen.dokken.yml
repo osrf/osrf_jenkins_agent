@@ -47,7 +47,7 @@ suites:
     attributes:
       'osrfbuild':
         'agent':
-          'install_agent_build_setup': 'false'
+          'install_agent_build_setup': false
     verifier:
       inspec_tests:
         - test/integration/agent
