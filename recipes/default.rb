@@ -57,6 +57,9 @@ if has_nvidia_support?
     node_make_jobs = 5
 end
 
+# override node name if a fixed_name was given
+node_name = node['osrfbuild']['agent']['fixed_name'] if node['osrfbuild']['agent']['fixed_name']
+
 agent_jenkins_user = search('osrfbuild_jenkins_users', "username:#{jenkins_username}").first
 template '/etc/default/jenkins-agent' do
   source 'jenkins-agent.env.erb'
