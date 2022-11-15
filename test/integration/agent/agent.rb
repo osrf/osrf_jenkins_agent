@@ -30,6 +30,6 @@ control 'check-no-nil-in-agents' do
   impact 'high'
   title 'Check that optional fields are not translated into nil strings'
   describe file('/etc/default/jenkins-agent') do
-    its('content') { should not_match /nil/ }
+    its('content') { should_not match /nil/ }
   end
 end
