@@ -14,5 +14,8 @@ default['osrfbuild']['agent']['java_args'] = ''
 default['osrfbuild']['agent']['username'] = 'default_username'
 default['osrfbuild']['agent']['description'] = 'default build agent description'
 default['osrfbuild']['agent']['executors'] = 1
-# TODO tags
+# if set to true, the provisioning will autogenerate the gpu labels
+# if set to false, the value of ['osrfbuild']['agent']['labels']
+# is respected. Note that the value here can be overloaded.
+default['osrfbuild']['agent']['auto_generate_labels'] = true
 default['osrfbuild']['agent']['labels'] = %w(docker)

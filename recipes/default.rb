@@ -53,8 +53,10 @@ node_name = "linux-#{node_base_name}.focal"
 if has_nvidia_support?
     node_name = "linux-#{node_base_name}.nv.focal"
     # TODO: do not assume nvidia machines are powerful
-    node_labels += ["gpu-reliable", "gpu-nvidia", "large-memory", "large-disk"]
     node_make_jobs = 5
+    if node['osrfbuild']['agent']['auto_generate_labels']
+      node_labels += ["gpu-reliable", "gpu-nvidia", "large-memory", "large-disk"]
+    end
 end
 
 # override node name if a nodename was given
