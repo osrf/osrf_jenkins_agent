@@ -48,7 +48,7 @@ suites:
       'osrfbuild':
         'agent':
           'install_agent_build_setup': false
-          'fixed_name': "my_custom_name"
+          'nodename': "my_custom_name"
     verifier:
       inspec_tests:
         - test/integration/agent
