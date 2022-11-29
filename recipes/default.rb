@@ -4,7 +4,6 @@
 #
 # Copyright:: 2020, Open Source Robotics Foundation.
 #
-
 linux_username = node['osrfbuild']['agent']['linux_username']
 agent_homedir = "/home/#{linux_username}"
 
@@ -62,6 +61,8 @@ end
 node_name = node['osrfbuild']['agent']['nodename'] if node['osrfbuild']['agent']['nodename']
 
 agent_jenkins_user = search('osrfbuild_jenkins_users', "username:#{jenkins_username}").first
+raise "No databag found for username:#{jenkins_username} in data_bags" if agent_jenkins_user.nil?()
+
 template '/etc/default/jenkins-agent' do
   source 'jenkins-agent.env.erb'
   variables Hash[
