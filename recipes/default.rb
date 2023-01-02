@@ -15,6 +15,7 @@ end
 sudo linux_username do
   user linux_username
   nopasswd true
+  only_if { node['osrfbuild']['agent']['sudo_access'] }
 end
 
 apt_update "default" do
