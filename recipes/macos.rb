@@ -4,3 +4,7 @@ macos_userdefaults "jenkins autologin" do
   user :all
   value "jenkins"
 end
+
+execute "jenkins autologin" do
+  command "defaults write /Library/Preferences/com.apple.loginwindow autoLoginUser jenkins"
+end
