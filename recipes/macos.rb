@@ -16,7 +16,6 @@ swarm_jar_path = "/Users/jenkins/swarm-client.jar"
 remote_file swarm_jar_path do
   source "#{node['osrfbuild']['agent']['jenkins_url']}/swarm/swarm-client.jar"
   owner "jenkins"
-  group "jenkins"
 end
 
 # Map macOS platform version to version identifier
