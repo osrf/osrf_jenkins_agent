@@ -80,6 +80,7 @@ launchd "org.osrfoundation.build.jenkins-agent.plist" do
     -disableClientsUniqueId
     -deleteExistingClients
     -labels #{labels.join(' ')}
+    -e HOMEWBREW_FORCE_VENDOR_RUBY=1 MAKE_JOBS=8
   ]
   action [:create, :enable]
 end
