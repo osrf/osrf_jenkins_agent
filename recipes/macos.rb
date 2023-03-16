@@ -39,19 +39,33 @@ if node['osrfbuild']['agent']['auto_generate_labels']
   labels << "osx"
   labels << "osx_#{mac_version}"
 end
+description = "macOS #{mac_version} Jenkins agent"
 
-# Create launch service
-template "/Library/LaunchDaemons/org.osrfoundation.build.jenkins-agent.plist" do
-  source "jenkins-agent.plist.erb"
-  variables Hash[
-    swarm_jar_path: swarm_jar_path,
-    jenkins_url: node['osrfbuild']['agent']['jenkins_url'],
-    agent_name: agent_name,
-    username: jenkins_agent_user['username'],
-    token: jenkins_agent_user['password'],
-    description: "macOS #{mac_version} Jenkins agent",
-    labels: labels,
+launchd "org.osrfoundation.build.jenkins-agent.plist" do
+  path "/Library/LaunchDaemons/org.osrfoundation.build.jenkins-agent.plist"
+  keep_alive true
+  run_at_load true
+  username "jenkins"
+  working_directory "/Users/jenkins"
+  standard_in_path "/dev/null"
+  standard_out_path "/var/log/jenkins-agent.out.log"
+  standard_error_path "/var/log/jenkins-agent.err.log"
+  process_type "Interactive"
+  program_arguments %W[
+    /usr/bin/java
+    -jar
+    #{swarm_jar_path}
+    -url #{node['osrfbuild']['agent']['jenkins_url']}
+    -name #{agent_name}
+    -username #{jenkins_agent_user['username']}
+    -password #{jenkins_agent_user['password']}
+    -description #{description}
+    -mode exclusive
+    -executors 1
+    -fsroot /Users/jenkins
+    -disableClientsUniqueId
+    -deleteExistingClients
+    -labels #{labels.join(' ')}
   ]
+  action [:create, :enable]
 end
-
-# Start launch service
