@@ -21,7 +21,7 @@ launchd "org.xquartz.X11.plist" do
   run_at_load true
   working_directory "/Users/jenkins"
   process_type "Interactive"
-  program "/Applications/Utilities/X11.app/Contents/MacOS/X11"
+  program "/Applications/Utilities/XQuartz.app/Contents/MacOS/X11"
   action [:create, :enable]
 end
 
