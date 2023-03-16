@@ -1,5 +1,12 @@
-homebrew_cask 'xquartz' do
-  owner 'jenkins'
+# Install xquartz
+remote_file "/tmp/xquartz.pkg" do
+  source "https://github.com/XQuartz/XQuartz/releases/download/XQuartz-2.8.5/XQuartz-2.8.5.pkg"
+  not_if "pkgutil --pkg-info org.xquartz.X11"
+end
+
+execute "install xquartz" do
+  command "installer -pkg /tmp/xquartz.pkg -target /"
+  not_if "pkgutil --pkg-info org.xquartz.X11"
 end
 
 directory "/Users/jenkins/Library/LaunchAgents" do
