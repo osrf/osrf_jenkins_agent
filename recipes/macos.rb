@@ -1,5 +1,25 @@
-# Install java
+homebrew_cask 'xquartz' do
+  owner 'jenkins'
+end
 
+directory "/Users/jenkins/Library/LaunchAgents" do
+  owner "jenkins"
+  group "staff"
+  recursive true
+end
+
+launchd "org.xquartz.X11.plist" do
+  path "/Users/jenkins/Library/LaunchAgents/org.xquartz.X11.plist"
+  keep_alive true
+  run_at_load true
+  working_directory "/Users/jenkins"
+  process_type "Interactive"
+  program "/Applications/Utilities/X11.app/Contents/MacOS/X11"
+  action [:create, :enable]
+end
+
+
+# Install java
 remote_file "/tmp/jdk8.pkg" do
   source "https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u362-b09/OpenJDK8U-jdk_x64_mac_hotspot_8u362b09.pkg"
   not_if "pkgutil --pkg-info net.temurin.8.jdk"
