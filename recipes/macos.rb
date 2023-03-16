@@ -41,6 +41,11 @@ if node['osrfbuild']['agent']['auto_generate_labels']
 end
 description = "macOS #{mac_version} Jenkins agent"
 
+directory "/Users/jenkins/log" do
+  owner "jenkins"
+  group "staff"
+end
+
 launchd "org.osrfoundation.build.jenkins-agent.plist" do
   path "/Library/LaunchDaemons/org.osrfoundation.build.jenkins-agent.plist"
   keep_alive true
@@ -48,8 +53,8 @@ launchd "org.osrfoundation.build.jenkins-agent.plist" do
   username "jenkins"
   working_directory "/Users/jenkins"
   standard_in_path "/dev/null"
-  standard_out_path "/var/log/jenkins-agent.out.log"
-  standard_error_path "/var/log/jenkins-agent.err.log"
+  standard_out_path "/Users/jenkins/log/jenkins-agent.out.log"
+  standard_error_path "/Users/jenkins/log/jenkins-agent.err.log"
   process_type "Interactive"
   program_arguments %W[
     /usr/bin/java
