@@ -46,6 +46,13 @@ directory "/Users/jenkins/log" do
   group "staff"
 end
 
+
+# Create workspace inside jenkins home directory
+directory "/Users/jenkins/jenkins-agent" do
+  owner "jenkins"
+  group "staff"
+end
+
 launchd "org.osrfoundation.build.jenkins-agent.plist" do
   path "/Library/LaunchDaemons/org.osrfoundation.build.jenkins-agent.plist"
   keep_alive true
@@ -67,7 +74,7 @@ launchd "org.osrfoundation.build.jenkins-agent.plist" do
     -description #{description}
     -mode exclusive
     -executors 1
-    -fsroot /Users/jenkins
+    -fsroot /Users/jenkins/jenkins-agent
     -disableClientsUniqueId
     -deleteExistingClients
     -labels #{labels.join(' ')}
