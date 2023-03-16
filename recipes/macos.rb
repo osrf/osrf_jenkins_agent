@@ -68,8 +68,7 @@ launchd "org.osrfoundation.build.jenkins-agent.plist" do
   process_type "Interactive"
   program_arguments %W[
     /usr/bin/java
-    -jar
-    #{swarm_jar_path}
+    -jar #{swarm_jar_path}
     -url #{node['osrfbuild']['agent']['jenkins_url']}
     -name #{agent_name}
     -username #{jenkins_agent_user['username']}
