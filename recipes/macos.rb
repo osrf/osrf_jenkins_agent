@@ -36,11 +36,13 @@ agent_name = "mac-#{node["hostname"]}.#{mac_version}"
 jenkins_agent_username = node['osrfbuild']['agent']['username']
 jenkins_agent_user = data_bag_item('osrfbuild_jenkins_users', jenkins_agent_username)
 labels = node['osrfbuild']['agent']['labels'].dup || Array.new
+hw = node['hardware']
+description = "macOS #{hw['operating_system_version']} #{hw['current_processor_speed']} #{hw['cpu_type']} #{hw['physical_memory']} #{} Jenkins agent"
 if node['osrfbuild']['agent']['auto_generate_labels']
   labels << "osx"
   labels << "osx_#{mac_version}"
+  labels << hw['architecture']
 end
-description = "macOS #{mac_version} Jenkins agent"
 
 directory "/Users/jenkins/log" do
   owner "jenkins"
