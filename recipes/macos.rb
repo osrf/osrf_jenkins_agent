@@ -34,7 +34,7 @@ mac_version = case node["platform_version"]
 agent_name = "mac-#{node["hostname"]}.#{mac_version}"
 jenkins_agent_username = node['osrfbuild']['agent']['username']
 jenkins_agent_user = data_bag_item('osrfbuild_jenkins_users', jenkins_agent_username)
-labels = node['osrfbuild']['agent']['labels'] || Array.new
+labels = node['osrfbuild']['agent']['labels'].dup || Array.new
 if node['osrfbuild']['agent']['auto_generate_labels']
   labels << "osx"
   labels << "osx_#{mac_version}"
