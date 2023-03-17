@@ -21,4 +21,3 @@ default['osrfbuild']['agent']['executors'] = 1
 # if set to false, the value of ['osrfbuild']['agent']['labels']
 # is respected. Note that the value here can be overloaded.
 default['osrfbuild']['agent']['auto_generate_labels'] = true
-default['osrfbuild']['agent']['labels'] = %w(docker)
