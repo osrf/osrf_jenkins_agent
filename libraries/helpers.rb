@@ -8,7 +8,7 @@ module OSRFJenkinsAgent
     #
     # @return [Array]
     def nvidia_devices
-      node['gpu_devices'].select do |_, dev|
+      node['gpu_devices'].values.select do |dev|
         dev['vendor'] =~ /nvidia/i
       end
     end
@@ -28,7 +28,7 @@ module OSRFJenkinsAgent
     #
     # @return [Boolean]
     def has_nvidia_grid_support?
-      nvidia_devices.any? { |_, dev| dev['device'] =~ /GRID/ }
+      nvidia_devices.any? { |dev| dev['device'] =~ /GRID/ }
     end
   end
 end
