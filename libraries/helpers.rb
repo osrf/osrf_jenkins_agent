@@ -17,11 +17,10 @@ module OSRFJenkinsAgent
     #
     # @return [Boolean]
     def has_nvidia_support?
-
       if ENV['CHEF_TEST_FAKE_NVIDIA_SUPPORT'] == 'true'
         return true
       end
-      shell_out('lspci').stdout.match?(/(?:3D|VGA).*NVIDIA/)
+      nvidia_devices.any?
     end
 
     # Determines if an NVIDIA card GRID is detected on the system
@@ -29,7 +28,7 @@ module OSRFJenkinsAgent
     #
     # @return [Boolean]
     def has_nvidia_grid_support?
-      shell_out('lspci').stdout.match?(/.*NVIDIA.*GRID/)
+      nvidia_devices.any? { |_, dev| dev['device'] =~ /GRID/ }
     end
   end
 end
