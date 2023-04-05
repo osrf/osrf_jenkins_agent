@@ -3,7 +3,7 @@ Ohai.plugin(:GPUDevices) do
 
   def gpu_devices_from_lspci
     shell_out('lspci -vmm').stdout.split("\n\n").select do |pcidev|
-      pcidev =~ /(?:3D|VGA)(?: compatible) controller/
+      pcidev =~ /(?:3D|VGA)(?: compatible)? controller/
     end.map do |gpudev|
       Mash.new.tap do |properties|
         gpudev.lines.map do |line|
