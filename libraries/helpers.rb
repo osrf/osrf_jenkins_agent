@@ -4,6 +4,15 @@
 #
 module OSRFJenkinsAgent
   module Helpers
+    # List nvidia devices present on the system.
+    #
+    # @return [Array]
+    def nvidia_devices
+      node['gpu_devices'].select do |_, dev|
+        dev['vendor'] =~ /nvidia/i
+      end
+    end
+
     # Determines if an NVIDIA card is detected on the system
     #
     # @return [Boolean]
