@@ -1,3 +1,44 @@
+## Underautomated setup instructions
+# This section lists operations which were resistant to initial attempts to
+# automate them.
+# Hopefully with time, effort, and documentation we can find ways to automate these steps as well.
+
+# Start by checking for updates and running any pending OS updates.
+# Do not do major macOS version upgrades, such as Monterey -> Ventura.
+
+# `administrator` user should already exist and the password is available in Bitwarden.
+
+# Create `jenkins` account with sudo / administrator access to the host.
+# Set it up for passwordless sudo.
+
+# Log in as the Jenkins user, leaving accessibility, siri, and apple ID sign in disabled during initial user setup.
+
+# Enable autologin for Jenkins from Login options, this is required so that xquartz is started on system boot.
+
+# Verify SSH and VNC remote access are enabled, which should already true for
+# our hosted machines.
+# Verify remote management is enabled _only_ for administrator
+
+# Verify wifi and bluetooth are disabled, which should already be true for
+# our hosted machines.
+
+# Disable Spotlight indexing. It's worth doing globally but at the very least
+# make sure that `/Users/jenkins` and `/usr/local` are disabled.
+
+# In Energy Saver settings, verify that display and system sleep are disabled
+# completely by setting them to Never. There is no attached display so this
+# will not spend extra watts.
+
+
+# Run `git` or `cc` so that macOS prompts you to install developer tools.
+
+# Enable developer mode with `/usr/sbin/DevToolsSecurity -enable`
+
+# As the `jenkins` user, install homebrew using the instructions on https://brew.sh
+
+# Run `brew doctor` to verify that homebrew has no complaints post-installation.
+
+
 # Install xquartz
 remote_file "/tmp/xquartz.pkg" do
   source "https://github.com/XQuartz/XQuartz/releases/download/XQuartz-2.8.5/XQuartz-2.8.5.pkg"
