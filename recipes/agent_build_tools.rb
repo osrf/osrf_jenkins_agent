@@ -52,8 +52,31 @@ package "nvidia-docker2" do
   only_if { has_nvidia_support? }
 end
 
+if has_nvidia_support? and nvidia_devices.size != 1
+  Chef::Log.warn("There are multiple nvidia devices and I am only looking at the first!")
+end
+
 # GeForce GTX 550 Ti requires old 3xx.xx series
-package 'nvidia-384' do
+# GRID K520 could probably take newer but is working with the current driver.
+#
+# 470 for everything else is not the newest but it works :shrug:
+nvidia_driver = case nvidia_devices.first['device']
+                when /GTX 550/
+                  # Old optimus machine in OSRF office
+                  'nvidia-384'
+                when /GRID K520/
+                  # AWS g2 instances
+                  'nvidia-384'
+                when /Tesla M60/
+                  # AWS g3 instances
+                  'nvidia-driver-470'
+                else
+                  Chef::Log.warn("Untested GPU `#{nvidia_devices.first['device']}` being used. Assuming a functioning driver")
+                  'nvidia-driver-470'
+                end
+
+
+package nvidia_driver do
   only_if { has_nvidia_support? }
 end
 
