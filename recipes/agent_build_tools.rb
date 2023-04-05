@@ -55,12 +55,13 @@ end
 if has_nvidia_support? and nvidia_devices.size != 1
   Chef::Log.warn("There are multiple nvidia devices and I am only looking at the first!")
 end
+nvidia_device = if has_nvidia_support?
+                  nvidia_devices.first['device']
+                else
+                  nil
+                end
 
-# GeForce GTX 550 Ti requires old 3xx.xx series
-# GRID K520 could probably take newer but is working with the current driver.
-#
-# 470 for everything else is not the newest but it works :shrug:
-nvidia_driver = case nvidia_devices.first['device']
+nvidia_driver = case nvidia_device
                 when /GTX 550/
                   # Old optimus machine in OSRF office
                   'nvidia-384'
@@ -70,6 +71,12 @@ nvidia_driver = case nvidia_devices.first['device']
                 when /Tesla M60/
                   # AWS g3 instances
                   'nvidia-driver-470'
+                when nil
+                  # it doesn't really matter which driver we use
+                  # if there is no nvidia device but specify
+                  # one to avoid a warning.
+                  'nvidia-driver-470'
+
                 else
                   Chef::Log.warn("Untested GPU `#{nvidia_devices.first['device']}` being used. Assuming a functioning driver")
                   'nvidia-driver-470'
