@@ -71,6 +71,9 @@ nvidia_driver = case nvidia_device
                 when /Tesla M60/
                   # AWS g3 instances
                   'nvidia-driver-470'
+                when /Device 2237/
+                  # AWS g5 instances
+                  'nvidia-driver-470'
                 when nil
                   # it doesn't really matter which driver we use
                   # if there is no nvidia device but specify
