@@ -82,7 +82,6 @@ nvidia_driver = case nvidia_device
                   # if there is no nvidia device but specify
                   # one to avoid a warning.
                   'nvidia-driver-470'
-
                 else
                   Chef::Log.warn("Untested GPU `#{nvidia_devices.first['device']}` being used. Assuming a functioning driver")
                   'nvidia-driver-470'
