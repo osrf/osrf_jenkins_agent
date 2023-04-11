@@ -17,8 +17,7 @@ jobs:
   test:
     runs-on: ubuntu-20.04
     name: 20.04 (${{ matrix.suite }} \
-          chef ${{ matrix.chef_version }} \
-          fake-nvidia ${{ matrix.nvidia_support }})
+          chef ${{ matrix.chef_version }})
     strategy:
       matrix:
         suite:
