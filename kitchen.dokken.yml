@@ -54,3 +54,22 @@ suites:
         - test/integration/agent
         - test/integration/x11_no_support
         - test/integration/my_custom_name
+  - name: gpu-agent
+    data_bags_path: "test/integration/data_bags"
+    run_list:
+      - recipe[osrf_jenkins_agent]
+    attributes:
+      'gpu_devices':
+        '0d:00.0':
+          slot: '0d:00.0'
+          class: VGA compatible controller
+          vendor: mock NVIDIA
+          device: mock TU104GL [Tesla T4]
+          svendor: mock NVIDIA
+          sdevice: mock TU104GL [Tesla T4]
+          physlot: '30'
+          rev: a1
+    verifier:
+      inspec_tests:
+        - test/integration/agent
+        - test/integration/x11_support
