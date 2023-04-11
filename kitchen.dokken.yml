@@ -6,8 +6,6 @@ driver:
   privileged: true
   env:
     - CHEF_LICENSE=accept
-    # yamllint disable-line rule:line-length
-    - CHEF_TEST_FAKE_NVIDIA_SUPPORT=<%= ENV['CHEF_TEST_FAKE_NVIDIA_SUPPORT'] || false %>
 
 transport:
   name: dokken
