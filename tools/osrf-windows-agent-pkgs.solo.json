@@ -1,0 +1,5 @@
+{
+	"run_list": ["recipe[windows_agent_build_tools.rb]"],
+	"override_attributes": {
+	}
+}
