@@ -19,12 +19,18 @@ end
 chocolatey_package 'cuda' do
 end
 
-python_package 'vcstool' do
-  action :install
+# Can not use python_package to install pip packages because that will require
+# metadata to have python as depends. To get the python cookbook the system
+# will need to have berkshelf which requires ruby. Ruby is being installed
+# here so a chicken-egg problems is running.
+execute 'install_vcstool' do
+  command 'pip install vcstool'
+  action :run
 end
 
-python_package 'colcon-common-extensions' do
-  action :install
+execute 'install_colcon' do
+  command 'pip install -U colcon-common-extensions'
+  action :run
 end
 
 # AdoptOpenJDK installer documentation https://adoptopenjdk.net/installation.html#windows-msi
