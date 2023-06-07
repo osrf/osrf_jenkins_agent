@@ -9,7 +9,7 @@ chocolatey_package 'python' do
 end
 
 chocolatey_package 'ruby' do
-  version [ '3.1.3' ]
+  version [ '3.1.3.1' ]
 end
 
 chocolatey_package 'cmake' do
