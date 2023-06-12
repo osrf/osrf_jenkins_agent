@@ -16,11 +16,8 @@ chocolatey_package 'cmake' do
   version [ '3.25' ]
 end
 
-chocolatey_package 'cuda' do
-end
+chocolatey_package 'cuda'
 
-python_package 'vcstool'
-python_package 'colcon-common-extensions'
 
 # AdoptOpenJDK installer documentation https://adoptopenjdk.net/installation.html#windows-msi
 windows_package 'openjdk' do
@@ -49,3 +46,5 @@ execute 'bootstrap-vcpkg' do
   cwd 'C:/vcpkg'
   action :run
 end
+
+chocolatey_package 'patch'
