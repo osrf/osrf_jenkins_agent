@@ -15,7 +15,3 @@ if platform?('linux')
   # repositories (chef-osrf)
   depends "docker"
 end
-
-if platform?('windows')
-  depends "python"
-end
