@@ -1,7 +1,6 @@
 $ErrorActionPreference = 'Stop'
-. { iwr -useb https://omnitruck.cinc.sh/install.ps1 } | iex; install -version 17
 Set-ExecutionPolicy Bypass -Scope Process -Force;. { iwr -useb https://chocolatey.org/install.ps1 } | iex
-choco install -y git
+choco install -y git chefdk
 refreshenv
 
 Remove-Item -Path osrf_jenkins_agent -Force -Recurse -ErrorAction SilentlyContinue
