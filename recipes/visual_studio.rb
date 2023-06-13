@@ -26,14 +26,16 @@ base_options = '--quiet --wait --norestart '
 
 installer_options = base_options + package_arguments
 
-visual_studio_source = 'https://aka.ms/vs/16/release/vs_%s.exe' % node['ros2_windows']['vs_version']
+node['vs_version'] = 'community'
+
+visual_studio_source = 'https://aka.ms/vs/16/release/vs_%s.exe' % node['vs_version']
 
 vs_version_camel_case = {
   'buildtools' => 'BuildTools',
   'community' => 'Community',
   'professional' => 'Professional',
   'enterprise' => 'Enterprise'
-}[node['ros2_windows']['vs_version']]
+}[node['vs_version']]
 
 visual_studio_path = 'c:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\%s' % vs_version_camel_case
 windows_package 'Update VS' do
