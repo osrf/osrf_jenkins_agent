@@ -1,12 +1,11 @@
+include_recipe 'osrf_jenkins_agent::python'
+include_recipe 'osrf_jenkins_agent::pip_installs'
+
 chocolatey_package 'meinberg-ntp'
 # Used by release-tools particularly sdformat
 chocolatey_package 'wget'
 
 #  VS 2019 Community java 8 vcpkg-temp-cache
-
-chocolatey_package 'python' do
-  version [ '3.11.2' ]
-end
 
 chocolatey_package 'ruby' do
   version [ '3.1.3.1' ]
