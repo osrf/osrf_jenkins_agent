@@ -26,7 +26,7 @@ base_options = '--quiet --wait --norestart '
 
 installer_options = base_options + package_arguments
 
-node['vs_version'] = 'community'
+node.default['vs_version'] = 'community'
 
 visual_studio_source = 'https://aka.ms/vs/16/release/vs_%s.exe' % node['vs_version']
 
