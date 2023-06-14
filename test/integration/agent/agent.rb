@@ -33,3 +33,11 @@ control 'check-no-nil-in-agents' do
     its('content') { should_not match /nil/ }
   end
 end
+
+control 'check-no-default-label' do
+  impact 'high'
+  title 'Check that no default label is being applied. arm agents do not use docker'
+  describe file('/etc/default/jenkins-agent') do
+    its('content') { should match /LABELS=''/ }
+  end
+end
