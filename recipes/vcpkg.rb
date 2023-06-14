@@ -8,6 +8,13 @@ git vcpkg_dir do
   action :sync
 end
 
+# This should be in sync with release-tools scripts
+git "#{vcpkg_dir}/osrf_vcpkg_ports" do
+  repository 'https://github.com/osrf/vcpkg-ports/'
+  revision 'master'
+  action :sync
+end
+
 execute 'bootstrap-vcpkg' do
   command "#{vcpkg_dir}/bootstrap-vcpkg.bat"
   cwd vcpkg_dir
