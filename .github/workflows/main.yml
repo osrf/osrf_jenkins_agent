@@ -4,8 +4,7 @@ name: main
 "on":
   pull_request:
   push:
-    branches:
-      - latest
+
 jobs:
   yamllint:
     runs-on: ubuntu-latest
