@@ -23,18 +23,4 @@ windows_package 'openjdk' do
   action :install
 end
 
-# TODO (j-rivero): grab the snapshot tab from release-tools once the
-# gz-collections.yaml is ready with that info
-git 'C:/vcpkg' do
-  repository 'https://github.com/microsoft/vcpkg.git'
-  revision '2022.02.23'
-  action :sync
-end
-
-execute 'bootstrap-vcpkg' do
-  command 'C:/vcpkg/bootstrap-vcpkg.bat'
-  cwd 'C:/vcpkg'
-  action :run
-end
-
-chocolatey_package 'patch'
+include_recipe 'osrf_jenkins_agent::vcpkg'
