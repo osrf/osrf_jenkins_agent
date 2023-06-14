@@ -7,4 +7,5 @@ node.run_state[:python_dir] = python_dir
 windows_package 'python' do
   source "https://www.python.org/ftp/python/#{python_version}/python-#{python_version}-amd64.exe"
   options "/quiet TargetDir=#{python_dir} PrependPath=1 Include_debug=1 Include_symbols=1"
+  installer_type :custom
 end
