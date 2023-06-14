@@ -1,6 +1,6 @@
-vcpkg_dir = "C:/vcpkg"
+vcpkg_dir = 'C:/vcpkg'
 
-# TODO (j-rivero): grab the snapshot tab from release-tools once the
+# TODO: (j-rivero): grab the snapshot tab from release-tools once the
 # gz-collections.yaml is ready with that info
 git vcpkg_dir do
   repository 'https://github.com/microsoft/vcpkg.git'
@@ -9,15 +9,15 @@ git vcpkg_dir do
 end
 
 execute 'bootstrap-vcpkg' do
-  command "#{vcpkg_dir}/bootstrap-vcpkg.bat"}
+  command "#{vcpkg_dir}/bootstrap-vcpkg.bat"
   cwd vcpkg_dir
   action :run
 end
 
 chocolatey_package 'patch'
 
-patches_temp = vcpkg_dir + "/.osrf_snapshot_patches"
-patches_applied = patches_temp + "PACTHES_APPLIED"
+patches_temp = "#{vcpkg_dir}/.osrf_snapshot_patches"
+patches_applied = "#{patches_temp}/PACTHES_APPLIED"
 
 directory patches_temp do
   action :create
@@ -44,7 +44,7 @@ vcpkg_patches.each do |file|
   end
 end
 
-file PACTHES_APPLIED do
+file patches_applied do
   action :create
   not_if { ::File.exist?(patches_applied) }
 end
