@@ -1,3 +1,10 @@
+windows_package 'Install cuda' do
+  source 'https://developer.download.nvidia.com/compute/cuda/12.0.1/local_installers/cuda_12.0.1_528.33_windows.exe'
+  installer_type :custom
+  options '/s'
+end
+
+
 include_recipe 'osrf_jenkins_agent::python'
 include_recipe 'osrf_jenkins_agent::pip_installs'
 include_recipe 'osrf_jenkins_agent::visual_studio'
@@ -13,8 +20,6 @@ end
 chocolatey_package 'cmake' do
   version [ '3.25' ]
 end
-
-chocolatey_package 'cuda'
 
 # AdoptOpenJDK installer documentation https://adoptopenjdk.net/installation.html#windows-msi
 windows_package 'openjdk' do
