@@ -34,7 +34,7 @@ control 'check-no-nil-in-agents' do
   end
 end
 
-control 'check-no-default-dcoker-label' do
+control 'check-no-default-docker-label' do
   impact 'high'
   title 'Check that no default docker label is being applied. Historically meant amd64-docker systems'
   describe file('/etc/default/jenkins-agent') do
