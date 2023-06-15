@@ -9,6 +9,8 @@ packages_to_install =  %w[
   Microsoft.VisualStudio.Component.CoreBuildTools
   Microsoft.VisualStudio.Component.Roslyn.Compiler
   Microsoft.VisualStudio.Component.TextTemplating
+  Microsoft.VisualStudio.Component.VC.ATL
+  Microsoft.VisualStudio.Component.VC.ATLMFC
   Microsoft.VisualStudio.Component.VC.CLI.Support
   Microsoft.VisualStudio.Component.VC.CoreBuildTools
   Microsoft.VisualStudio.Component.VC.CoreIde
