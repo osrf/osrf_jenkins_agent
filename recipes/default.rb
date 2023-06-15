@@ -51,7 +51,6 @@ node_labels = if node['osrfbuild']['agent']['labels']
               else
                 Array.new
               end
-# All default agents are "docker" agents.
 node_name = "linux-#{node_base_name}.focal"
 
 if has_nvidia_support?
