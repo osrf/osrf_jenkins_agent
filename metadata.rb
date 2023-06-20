@@ -10,8 +10,9 @@ chef_version ">= 14.0"
 # For adding dependencies on Windows pleaes check the tools/ directory
 # to be sure that bootstrap tools script is not broken afterwards
 
-if platform?('linux')
+puts Ohai["platform_version"]
+#if platform?('linux')
   # be careful if set a version on docker since it can conflict with other
   # repositories (chef-osrf)
   depends "docker"
-end
+#end
