@@ -4,7 +4,6 @@ windows_package 'Install cuda' do
   options '/s'
 end
 
-
 include_recipe 'osrf_jenkins_agent::python'
 include_recipe 'osrf_jenkins_agent::pip_installs'
 include_recipe 'osrf_jenkins_agent::visual_studio'
@@ -19,6 +18,13 @@ end
 
 chocolatey_package 'cmake' do
   version [ '3.25' ]
+end
+
+windows_env 'PATH' do
+  key_name 'PATH'
+  value 'C:\\Program Files\\Git\\cmd;C:\\Program Files\\CMake\\bin'
+  delim ';'
+  action :modify
 end
 
 # AdoptOpenJDK installer documentation https://adoptopenjdk.net/installation.html#windows-msi
