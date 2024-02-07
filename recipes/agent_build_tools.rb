@@ -17,18 +17,28 @@ group 'docker' do
   action :manage # Group should be created by docker package.
 end
 
+# NOTE: python 2 packages were used in the original release-tools code
+# kept for transitioning and added the corresponding python3 packages
 %w[
+  bc
+  git
   gnupg2
+  gpgv
   groovy
   libffi-dev
   libssl-dev
   mercurial
   ntp
   pciutils
+  python-psutil
+  python3-psutil
+  python-setuptools
+  python3-setuptools
   qemu-user-static
+  squid-deb-proxy
   sudo
-  x11-xserver-utils
   wget
+  x11-xserver-utils
 ].each do |pkg|
   package pkg
 end
