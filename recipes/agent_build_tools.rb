@@ -30,7 +30,6 @@ end
   mercurial
   ntp
   pciutils
-  python-empy
   python3-empy
   python-psutil
   python3-psutil
