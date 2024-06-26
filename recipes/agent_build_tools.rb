@@ -98,8 +98,11 @@ nvidia_driver = case nvidia_device
                   'nvidia-driver-470'
                 end
 
-
 package nvidia_driver do
+  only_if { has_nvidia_support? }
+end
+
+package 'mesa-utils' do
   only_if { has_nvidia_support? }
 end
 
