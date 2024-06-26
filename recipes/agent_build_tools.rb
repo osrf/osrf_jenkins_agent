@@ -148,6 +148,12 @@ package 'ubuntu-session' do
   action :purge
 end
 
+# Breaking X loading on AWS
+package 'pulseaudio-module-bluetooth' do
+  only_if { has_nvidia_support? }
+  action :purge
+end
+
 package "lightdm"
 cookbook_file "/etc/lightdm/xhost.sh" do
   source "lightdm/xhost.sh"
