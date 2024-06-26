@@ -6,3 +6,4 @@ fi
 
 xhost +si:localuser:root
 xhost +si:localuser:jenkins
+xhost +si:localuser:ubuntu  # for using with ros_buildfarm code
