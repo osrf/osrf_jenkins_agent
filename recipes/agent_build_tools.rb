@@ -133,14 +133,11 @@ end
 # TODO: assuming :0 here is fragile
 ENV['DISPLAY'] = ':0'
 
-# gdm3 systemctl delete the display-manager systemctl when disabled
-# be sure of installing lightdm after this and not before
-service "gdm3" do
-  action [:start, :disable]
-  only_if { node['packages'].keys.include? "gdm3" }
+# gdm3 will conflict with lightdm and make it not to start
+package 'gdm3' do
   only_if { has_nvidia_support? }
+  action :purge
 end
-
 # lightdm seems to need unity-greeter and remove ubuntu-session to work out-of-the-box
 # see: https://github.com/osrf/osrf_jenkins_agent/issues/25
 package 'unity-greeter' do
@@ -183,7 +180,7 @@ execute 'set-lightdm-display-manager debconf' do
   command 'echo set shared/default-x-display-manager lightdm | debconf-communicate'
   not_if 'grep lightdm /etc/X11/default-display-manager'
 end
-execute 'reconfigure-gdm3' do
+execute 'reconfigure-lightdm' do
   command 'dpkg-reconfigure lightdm'
   environment ({'DEBIAN_FRONTEND' => 'noninteractive', 'DEBCONF_NONINTERACTIVE_SEEN' => 'true'})
   not_if 'grep lightdm /etc/X11/default-display-manager'
