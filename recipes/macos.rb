@@ -95,6 +95,10 @@ mac_version = case node["platform_version"]
                 "monterey"
               when /\A13\./
                 "ventura"
+              when /\A14\./
+                "sonoma"
+              when /\A15\./
+                "sequoia"
               else
                 Chef::Fatal.log("macOS version #{node["platform_version"]} is not supported by this cookbook")
                 raise
