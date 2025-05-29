@@ -2,12 +2,7 @@
 
 linux_username = node['osrfbuild']['agent']['linux_username']
 
-# Problems with seccomp policy and Ubuntu Jammy images require at least version 20.10.12
-# More info at: https://github.com/ignition-tooling/release-tools/issues/654#issue-1162900579
-docker_installation_package 'default' do
-  version '20.10.12'
-  action :create
-end
+package 'docker.io'
 
 # Add agent user to the docker group to allow them to build and run docker
 # containers.
@@ -31,9 +26,7 @@ end
   ntp
   pciutils
   python3-empy
-  python-psutil
   python3-psutil
-  python-setuptools
   python3-setuptools
   qemu-user-static
   squid-deb-proxy
