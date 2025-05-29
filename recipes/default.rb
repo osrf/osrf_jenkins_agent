@@ -23,13 +23,13 @@ apt_update "default" do
   frequency 3600
 end
 
-package 'default-jre-headless'
+package 'openjdk-21-jre-headless'
 
 include_recipe 'osrf_jenkins_agent::agent_build_tools' if node['osrfbuild']['agent']['install_agent_build_setup']
 
 # TODO: how to read attributes from chef-osrf plugins into this cookbook
 # swarm_client_version = node['jenkins-plugins']['swarm']
-swarm_client_version = "3.24"
+swarm_client_version = "3.49"
 swarm_client_url = "https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/#{swarm_client_version}/swarm-client-#{swarm_client_version}.jar"
 swarm_client_jarfile_path = "#{agent_homedir}/swarm-client-#{swarm_client_version}.jar"
 
