@@ -36,6 +36,7 @@ Section "Device"
     Identifier     "Device0"
     Driver         "nvidia"
     VendorName     "NVIDIA Corporation"
+    BusID          "PCI:0:30:0"
 EndSection
 
 Section "Screen"
