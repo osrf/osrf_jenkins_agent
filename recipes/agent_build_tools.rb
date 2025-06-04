@@ -54,25 +54,6 @@ execute 'Configure nvidia-container-toolkit' do
   command 'nvidia-ctk runtime configure --runtime=docker && sudo systemctl restart docker'
 end
 
-# Focal uses 18.04 repository
-# for repo_uri in ['https://nvidia.github.io/libnvidia-container/stable/ubuntu18.04/$(ARCH)',
-#                 'https://nvidia.github.io/nvidia-container-runtime/stable/ubuntu18.04/$(ARCH)',
-#                 'https://nvidia.github.io/nvidia-docker/ubuntu18.04/$(ARCH)'] do
-#   apt_repository "nvidia-docker#{repo_uri.hash}" do
-#     uri repo_uri
-#     distribution '/'
-#     key ['https://nvidia.github.io/nvidia-docker/gpgkey']
-#     action :add
-#     only_if { has_nvidia_support? }
-#   end
-# end
-
-# install nvidia-docker2 is recommended although real support is via
-# container-toolkit
-# package "nvidia-docker2" do
-#   only_if { has_nvidia_support? }
-# end
-
 if has_nvidia_support? and nvidia_devices.size != 1
   Chef::Log.warn("There are multiple nvidia devices and I am only looking at the first!")
 end
