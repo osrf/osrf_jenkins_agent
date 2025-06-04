@@ -31,6 +31,7 @@ end
   qemu-user-static
   squid-deb-proxy
   sudo
+  ubuntu-drivers-common
   wget
   x11-xserver-utils
 ].each do |pkg|
