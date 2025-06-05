@@ -124,11 +124,6 @@ end
 # TODO: assuming :0 here is fragile
 ENV['DISPLAY'] = ':0'
 
-# gdm3 will conflict with lightdm and make it not to start
-package 'gdm3' do
-  only_if { has_nvidia_support? }
-  action :purge
-end
 # lightdm seems to need unity-greeter and remove ubuntu-session to work out-of-the-box
 # see: https://github.com/osrf/osrf_jenkins_agent/issues/25
 package 'unity-greeter' do
@@ -164,6 +159,12 @@ ruby_block "Ensure display-setup-script" do
       "display-setup-script=/etc/lightdm/xhost.sh"
     lightdm_conf.write_file if lightdm_conf.unwritten_changes?
   end
+end
+
+# gdm3 will conflict with lightdm and make it not to start
+package 'gdm3' do
+  only_if { has_nvidia_support? }
+  action :purge
 end
 
 # set lightdm as the display manager requires 3 commands
