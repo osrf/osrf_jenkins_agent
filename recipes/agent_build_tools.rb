@@ -144,6 +144,7 @@ package "lightdm"
 cookbook_file "/etc/lightdm/xhost.sh" do
   source "lightdm/xhost.sh"
   mode "0744"
+  notifies :restart, "service[accounts-daemon]", :delayed # Needs a restart before lightdm
   notifies :restart, "service[lightdm]", :delayed
 end
 cookbook_file "/etc/lightdm/lightdm.conf" do
@@ -181,9 +182,13 @@ execute 'set-lightdm-display-manager-etc' do
   command 'echo "/usr/sbin/lightdm" > /etc/X11/default-display-manager'
   not_if 'grep lightdm /etc/X11/default-display-manager'
 end
+service "accounts-daemon" do
+  action []
+end
 service "lightdm" do
   action [:start, :enable]
 end
+
 
 package "squid-deb-proxy"
 directory "/etc/squid-deb-proxy/mirror-dstdomain.acl.d" do
