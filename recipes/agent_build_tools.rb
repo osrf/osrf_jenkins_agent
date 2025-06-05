@@ -182,9 +182,6 @@ execute 'set-lightdm-display-manager-etc' do
   command 'echo "/usr/sbin/lightdm" > /etc/X11/default-display-manager'
   not_if 'grep lightdm /etc/X11/default-display-manager'
 end
-service "accounts-daemon" do
-  action []
-end
 service "lightdm" do
   action [:start, :enable]
 end
