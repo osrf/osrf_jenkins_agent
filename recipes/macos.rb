@@ -69,13 +69,13 @@ end
 
 # Install java
 remote_file "/tmp/jdk8.pkg" do
-  source "https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u362-b09/OpenJDK8U-jdk_x64_mac_hotspot_8u362b09.pkg"
-  not_if "pkgutil --pkg-info net.temurin.8.jdk"
+  source "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.7%2B6/OpenJDK21U-jdk_aarch64_mac_hotspot_21.0.7_6.pkg"
+  not_if "pkgutil --pkg-info net.temurin.21.jdk"
 end
 
 execute "install java" do
-  command "installer -pkg /tmp/jdk8.pkg -target /"
-  not_if "pkgutil --pkg-info net.temurin.8.jdk"
+  command "installer -pkg /tmp/jdk21.pkg -target /"
+  not_if "pkgutil --pkg-info net.temurin.21.jdk"
 end
 
 # Fetch swarm client jar
@@ -88,7 +88,7 @@ remote_file swarm_jar_path do
 end
 
 # Map macOS platform version to version identifier
-mac_version = case node["platform_version"] 
+mac_version = case node["platform_version"]
               when/\A11\./
                   "bigsur"
               when /\A12\./
