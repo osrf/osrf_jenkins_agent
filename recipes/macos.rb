@@ -69,7 +69,7 @@ end
 
 # Install java
 remote_file "/tmp/jdk21.pkg" do
-  source "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.7%2B6/OpenJDK21U-jdk_aarch64_mac_hotspot_21.0.7_6.pkg"
+  source "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.7%2B6/OpenJDK21U-jdk_x64_mac_hotspot_21.0.7_6.pkg"
   not_if "pkgutil --pkg-info net.temurin.21.jdk"
 end
 
