@@ -107,6 +107,8 @@ mac_version = case node["platform_version"]
 agent_name = "mac-#{node["hostname"]}.#{mac_version}"
 jenkins_agent_username = node['osrfbuild']['agent']['username']
 jenkins_agent_user = data_bag_item('osrfbuild_jenkins_users', jenkins_agent_username)
+raise "No databag found for username:#{jenkins_service_username} in data_bags" if jenkins_agent_user.nil?
+
 labels = node['osrfbuild']['agent']['labels'].dup || Array.new
 hw = node['hardware']
 description = "macOS #{hw['operating_system_version']} #{hw['current_processor_speed']} #{hw['cpu_type']} #{hw['physical_memory']} #{} Jenkins agent"
