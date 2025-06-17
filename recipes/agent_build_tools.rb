@@ -42,108 +42,96 @@ end
   package pkg
 end
 
-apt_repository "nvidia-container-toolkit" do
-  uri 'https://nvidia.github.io/libnvidia-container/stable/deb/$(ARCH)'
-  distribution '/'
-  key ['https://nvidia.github.io/libnvidia-container/gpgkey']
-  action :add
-  only_if { has_nvidia_support? }
+if has_nvidia_support? do
+  apt_repository "nvidia-container-toolkit" do
+    uri 'https://nvidia.github.io/libnvidia-container/stable/deb/$(ARCH)'
+    distribution '/'
+    key ['https://nvidia.github.io/libnvidia-container/gpgkey']
+    action :add
+  end
+
+  package 'nvidia-container-toolkit'
+
+  execute 'Configure nvidia-container-toolkit' do
+    command 'nvidia-ctk runtime configure --runtime=docker && sudo systemctl restart docker'
+  end
+
+  if nvidia_devices.size != 1 do
+    Chef::Log.warn("There are multiple nvidia devices and I am only looking at the first!")
+  end
+
+  nvidia_device = nvidia_devices.first['device']
+
+  nvidia_driver = case nvidia_device
+                  when /GTX 550/
+                    # Old optimus machine in OSRF office
+                    'nvidia-384'
+                  when /GRID K520/
+                    # AWS g2 instances
+                    'nvidia-384'
+                  when /Tesla M60/
+                    # AWS g3 instances
+                    'nvidia-driver-470'
+                  when /Tesla T4/
+                    # AWS g4dn instances
+                    'nvidia-driver-470'
+                  when /Device 2237/
+                    # AWS g5 instances
+                    'nvidia-driver-470'
+                  when nil
+                    # it doesn't really matter which driver we use
+                    # if there is no nvidia device but specify
+                    # one to avoid a warning.
+                    'nvidia-driver-470'
+                  else
+                    Chef::Log.warn("Untested GPU `#{nvidia_devices.first['device']}` being used. Assuming a functioning driver")
+                    'nvidia-driver-470'
+                  end
+  package nvidia_driver
+  package 'mesa-utils'
+
+  cookbook_file '/etc/modprobe.d/blacklist-nvidia-nouveau.conf' do
+    source 'blacklist-nvidia-nouveau.conf'
+    mode '0744'
+  end
+
+  cookbook_file '/etc/X11/xorg.conf' do
+    source 'xorg.conf.no_gpu'
+    mode "0744"
+  end
+
+  # Detecting AWS GRID cards that needs special configuration
+  cookbook_file '/etc/X11/xorg.conf' do
+    source 'xorg.conf.nvidia_aws'
+    mode "0744"
+    only_if { has_nvidia_grid_support? }
+  end
+  # Other NVIDIA cards use generic configuration
+  cookbook_file '/etc/X11/xorg.conf' do
+    source 'xorg.conf.nvidia'
+    mode "0744"
+    not_if { has_nvidia_grid_support? }
+  end
 end
 
-package 'nvidia-container-toolkit' do
-  only_if { has_nvidia_support? }
-end
 
-execute 'Configure nvidia-container-toolkit' do
-  command 'nvidia-ctk runtime configure --runtime=docker && sudo systemctl restart docker'
-  only_if { has_nvidia_support? }
-end
-
-if has_nvidia_support? and nvidia_devices.size != 1
-  Chef::Log.warn("There are multiple nvidia devices and I am only looking at the first!")
-end
-nvidia_device = if has_nvidia_support?
-                  nvidia_devices.first['device']
-                else
-                  nil
-                end
-
-nvidia_driver = case nvidia_device
-                when /GTX 550/
-                  # Old optimus machine in OSRF office
-                  'nvidia-384'
-                when /GRID K520/
-                  # AWS g2 instances
-                  'nvidia-384'
-                when /Tesla M60/
-                  # AWS g3 instances
-                  'nvidia-driver-470'
-                when /Tesla T4/
-                  # AWS g4dn instances
-                  'nvidia-driver-470'
-                when /Device 2237/
-                  # AWS g5 instances
-                  'nvidia-driver-470'
-                when nil
-                  # it doesn't really matter which driver we use
-                  # if there is no nvidia device but specify
-                  # one to avoid a warning.
-                  'nvidia-driver-470'
-                else
-                  Chef::Log.warn("Untested GPU `#{nvidia_devices.first['device']}` being used. Assuming a functioning driver")
-                  'nvidia-driver-470'
-                end
-
-package nvidia_driver do
-  only_if { has_nvidia_support? }
-end
-
-package 'mesa-utils' do
-  only_if { has_nvidia_support? }
-end
-
-cookbook_file '/etc/modprobe.d/blacklist-nvidia-nouveau.conf' do
-  source 'blacklist-nvidia-nouveau.conf'
-  mode '0744'
-  only_if { has_nvidia_support? }
-end
-
-cookbook_file '/etc/X11/xorg.conf' do
-  source 'xorg.conf.no_gpu'
-  mode "0744"
-  not_if { has_nvidia_support? }
-end
-# Detecting AWS GRID cards that needs special configuration
-cookbook_file '/etc/X11/xorg.conf' do
-  source 'xorg.conf.nvidia_aws'
-  mode "0744"
-  only_if { has_nvidia_grid_support? }
-end
-# Other NVIDIA cards use generic configuration
-cookbook_file '/etc/X11/xorg.conf' do
-  source 'xorg.conf.nvidia'
-  mode "0744"
-  only_if { has_nvidia_support? }
-  not_if { has_nvidia_grid_support? }
-end
 # TODO: assuming :0 here is fragile
 ENV['DISPLAY'] = ':0'
 
-# lightdm seems to need unity-greeter and remove ubuntu-session to work out-of-the-box
-# see: https://github.com/osrf/osrf_jenkins_agent/issues/25
-package 'unity-greeter' do
-  only_if { has_nvidia_support? }
-end
-package 'ubuntu-session' do
-  only_if { has_nvidia_support? }
-  action :purge
+if has_nvidia_support? do
+  # lightdm seems to need unity-greeter and remove ubuntu-session to work out-of-the-box
+  # see: https://github.com/osrf/osrf_jenkins_agent/issues/25
+  package 'unity-greeter'
+  package 'ubuntu-session' do
+    action :purge
+  end
+
+  # Breaking X loading on AWS
+  package 'pulseaudio-module-bluetooth' do
+    action :purge
+  end
 end
 
-# Breaking X loading on AWS
-package 'pulseaudio-module-bluetooth' do
-  only_if { has_nvidia_support? }
-  action :purge
-end
 
 package "lightdm"
 cookbook_file "/etc/lightdm/xhost.sh" do
