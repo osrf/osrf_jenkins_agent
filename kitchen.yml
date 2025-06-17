@@ -47,6 +47,7 @@ suites:
         'agent':
           'install_agent_build_setup': false
           'nodename': "my_custom_name"
+          'jenkins_url': 'https://citest.build.osrfoundation.org'
     verifier:
       inspec_tests:
         - test/integration/agent
