@@ -42,7 +42,7 @@ end
   package pkg
 end
 
-if has_nvidia_support? do
+if has_nvidia_support?
   apt_repository "nvidia-container-toolkit" do
     uri 'https://nvidia.github.io/libnvidia-container/stable/deb/$(ARCH)'
     distribution '/'
@@ -56,9 +56,7 @@ if has_nvidia_support? do
     command 'nvidia-ctk runtime configure --runtime=docker && sudo systemctl restart docker'
   end
 
-  if nvidia_devices.size != 1 do
-    Chef::Log.warn("There are multiple nvidia devices and I am only looking at the first!")
-  end
+  Chef::Log.warn("There are multiple nvidia devices and I am only looking at the first!") if nvidia_devices.size != 1
 
   nvidia_device = nvidia_devices.first['device']
 
@@ -118,7 +116,7 @@ end
 # TODO: assuming :0 here is fragile
 ENV['DISPLAY'] = ':0'
 
-if has_nvidia_support? do
+if has_nvidia_support?
   # lightdm seems to need unity-greeter and remove ubuntu-session to work out-of-the-box
   # see: https://github.com/osrf/osrf_jenkins_agent/issues/25
   package 'unity-greeter'
