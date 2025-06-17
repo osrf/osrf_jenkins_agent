@@ -2,6 +2,10 @@
 
 linux_username = node['osrfbuild']['agent']['linux_username']
 
+service 'accounts-daemon' do
+  action :nothing
+end
+
 package 'docker.io'
 
 # Add agent user to the docker group to allow them to build and run docker
