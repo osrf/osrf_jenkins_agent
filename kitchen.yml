@@ -65,7 +65,6 @@ suites:
       'osrfbuild':
         'agent':
           'jenkins_url': 'https://citest.build.osrfoundation.org'
-    attributes:
       'gpu_devices':
         '0d:00.0':
           slot: '0d:00.0'
