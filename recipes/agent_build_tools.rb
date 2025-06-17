@@ -56,6 +56,7 @@ end
 
 execute 'Configure nvidia-container-toolkit' do
   command 'nvidia-ctk runtime configure --runtime=docker && sudo systemctl restart docker'
+  only_if { has_nvidia_support? }
 end
 
 if has_nvidia_support? and nvidia_devices.size != 1
