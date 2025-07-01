@@ -1,0 +1,73 @@
+---
+driver:
+  name: dokken
+  chef_version: <%= ENV['CHEF_VERSION'] || 'current' %>
+  use_sudo: false
+  privileged: true
+  env:
+    - CHEF_LICENSE=accept
+
+transport:
+  name: dokken
+
+provisioner:
+  name: dokken
+  chef_binary: /opt/chef/bin/chef-solo
+  chef_options: "-Etest"
+  chef_log_level: debug
+  chef_output_format: doc
+
+platforms:
+  - name: ubuntu-20.04
+    driver:
+      image: dokken/ubuntu-20.04
+      pid_one_command: /bin/systemd
+      intermediate_instructions:
+        - RUN /usr/bin/apt-get update
+        - RUN /usr/bin/apt-get install -y pciutils
+
+verifier:
+  name: inspec
+
+suites:
+  - name: agent
+    data_bags_path: "test/integration/data_bags"
+    run_list:
+      - recipe[osrf_jenkins_agent]
+    verifier:
+      inspec_tests:
+        - test/integration/agent
+        - test/integration/x11_support
+  - name: agent-only
+    data_bags_path: "test/integration/data_bags"
+    run_list:
+      - recipe[osrf_jenkins_agent]
+    attributes:
+      'osrfbuild':
+        'agent':
+          'install_agent_build_setup': false
+          'nodename': "my_custom_name"
+    verifier:
+      inspec_tests:
+        - test/integration/agent
+        - test/integration/x11_no_support
+        - test/integration/my_custom_name
+  - name: gpu-agent
+    data_bags_path: "test/integration/data_bags"
+    run_list:
+      - recipe[osrf_jenkins_agent]
+    attributes:
+      'gpu_devices':
+        '0d:00.0':
+          slot: '0d:00.0'
+          class: VGA compatible controller
+          vendor: mock NVIDIA
+          device: mock TU104GL [Tesla T4]
+          svendor: mock NVIDIA
+          sdevice: mock TU104GL [Tesla T4]
+          physlot: '30'
+          rev: a1
+    verifier:
+      inspec_tests:
+        - test/integration/agent
+        - test/integration/x11_support
