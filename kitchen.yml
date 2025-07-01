@@ -26,10 +26,6 @@ suites:
   - name: default
     run_list:
       - recipe[osrf_jenkins_agent]
-    attributes:
-      'osrfbuild':
-        'agent':
-          'jenkins_url': 'https://citest.build.osrfoundation.org'
     verifier:
       inspec_tests:
         - test/integration/default
