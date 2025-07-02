@@ -34,10 +34,6 @@ suites:
     data_bags_path: "test/integration/data_bags"
     run_list:
       - recipe[osrf_jenkins_agent]
-    attributes:
-      'osrfbuild':
-        'agent':
-          'jenkins_url': 'https://citest.build.osrfoundation.org'
     verifier:
       inspec_tests:
         - test/integration/agent
@@ -51,7 +47,6 @@ suites:
         'agent':
           'install_agent_build_setup': false
           'nodename': "my_custom_name"
-          'jenkins_url': 'https://citest.build.osrfoundation.org'
     verifier:
       inspec_tests:
         - test/integration/agent
@@ -62,9 +57,6 @@ suites:
     run_list:
       - recipe[osrf_jenkins_agent]
     attributes:
-      'osrfbuild':
-        'agent':
-          'jenkins_url': 'https://citest.build.osrfoundation.org'
       'gpu_devices':
         '0d:00.0':
           slot: '0d:00.0'
