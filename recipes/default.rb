@@ -23,13 +23,13 @@ apt_update "default" do
   frequency 3600
 end
 
-package 'default-jre-headless'
+package 'openjdk-21-jre-headless'
 
 include_recipe 'osrf_jenkins_agent::agent_build_tools' if node['osrfbuild']['agent']['install_agent_build_setup']
 
 # TODO: how to read attributes from chef-osrf plugins into this cookbook
 # swarm_client_version = node['jenkins-plugins']['swarm']
-swarm_client_version = "3.24"
+swarm_client_version = "3.49"
 swarm_client_url = "https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/#{swarm_client_version}/swarm-client-#{swarm_client_version}.jar"
 swarm_client_jarfile_path = "#{agent_homedir}/swarm-client-#{swarm_client_version}.jar"
 
@@ -51,10 +51,10 @@ node_labels = if node['osrfbuild']['agent']['labels']
               else
                 Array.new
               end
-node_name = "linux-#{node_base_name}.focal"
+node_name = "linux-#{node_base_name}.#{node['lsb']['codename']}"
 
 if has_nvidia_support?
-  node_name = "linux-#{node_base_name}.nv.focal"
+  node_name = "linux-#{node_base_name}.nv.#{node['lsb']['codename']}"
   # TODO: do not assume nvidia machines are powerful
   node_make_jobs = 5
   if node['osrfbuild']['agent']['auto_generate_labels']
@@ -111,5 +111,6 @@ execute 'systemctl-daemon-reload' do
 end
 
 service 'jenkins-agent' do
-  action [:start, :enable]
+  action :enable
+  action :start unless ['test'].include? node.chef_environment
 end
