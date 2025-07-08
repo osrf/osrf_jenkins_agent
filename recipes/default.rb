@@ -51,10 +51,10 @@ node_labels = if node['osrfbuild']['agent']['labels']
               else
                 Array.new
               end
-node_name = "linux-#{node_base_name}.noble"
+node_name = "linux-#{node_base_name}.#{node['lsb']['codename']}"
 
 if has_nvidia_support?
-  node_name = "linux-#{node_base_name}.nv.noble"
+  node_name = "linux-#{node_base_name}.nv.#{node['lsb']['codename']}"
   # TODO: do not assume nvidia machines are powerful
   node_make_jobs = 5
   if node['osrfbuild']['agent']['auto_generate_labels']
