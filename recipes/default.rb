@@ -111,5 +111,6 @@ execute 'systemctl-daemon-reload' do
 end
 
 service 'jenkins-agent' do
-  action [:start, :enable]
+  action :enable
+  action :start unless ['test'].include? node.chef_environment
 end
