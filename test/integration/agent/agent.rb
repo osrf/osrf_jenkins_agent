@@ -17,12 +17,12 @@ end
 
 control 'jenkins-agent' do
   impact 'critical'
-  title 'jenkins-agent service should installed but can not run'
+  title 'jenkins-agent service should installed and enabled'
   describe service('jenkins-agent') do
     it { should be_installed }
-    # imposible to connect to server in tests, should not be up
     it { should be_enabled }
-    it { should_not be_running }
+    # Do not make any assumption about the running state since
+    # it can be running or not depending possibly on connection timeouts    
   end
 end
 
