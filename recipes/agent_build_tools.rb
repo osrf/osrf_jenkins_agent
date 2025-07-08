@@ -123,11 +123,6 @@ if has_nvidia_support?
   package 'ubuntu-session' do
     action :purge
   end
-
-  # Breaking X loading on AWS
-  package 'pulseaudio-module-bluetooth' do
-    action :purge
-  end
 end
 
 
