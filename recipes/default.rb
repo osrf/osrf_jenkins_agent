@@ -84,7 +84,7 @@ template '/etc/default/jenkins-agent' do
     labels: node_labels.join(' '),
     make_jobs: node_make_jobs,
   ]
-  notifies :enable, 'service[jenkins-agent]'
+  notifies :restart, 'service[jenkins-agent]'
 end
 
 directory '/etc/jenkins-agent'
@@ -111,5 +111,5 @@ execute 'systemctl-daemon-reload' do
 end
 
 service 'jenkins-agent' do
-  action :start unless ['test'].include? node.chef_environment
+  action ['test'].include?(node.chef_environment) ? [:enable] : [:enable, :start]
 end
