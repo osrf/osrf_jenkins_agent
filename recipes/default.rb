@@ -23,6 +23,13 @@ apt_update "default" do
   frequency 3600
 end
 
+# Needed to fix asan builds on Ubuntu 24.04
+# https://github.com/gazebo-tooling/release-tools/issues/1354
+sysctl 'vm.mmap_rnd_bits' do
+  value 28
+  action :apply
+end
+
 package 'openjdk-21-jre-headless'
 
 include_recipe 'osrf_jenkins_agent::agent_build_tools' if node['osrfbuild']['agent']['install_agent_build_setup']
