@@ -98,9 +98,6 @@ launchd "org.xquartz.X11.plist" do
 end
 
 
-# https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.7%2B6/OpenJDK21U-jdk_aarch64_mac_hotspot_21.0.7_6.pkg
-# https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.7%2B6/OpenJDK21U-jdk_x64_mac_hotspot_21.0.7_6.pkg
-
 temurin_arch = case hw['architecture']
                when /arm64/
                  "aarch64"
@@ -112,8 +109,8 @@ temurin_arch = case hw['architecture']
                end
 
 # Install java
-remote_file "/tmp/jdk21.pkg" do
-  source "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.7%2B6/OpenJDK21U-jdk_#{temurin_arch}_mac_hotspot_21.0.7_6.pkg"
+execute "Install temurin"
+  command "/usr/bin/curl -L -o /tmp/jdk21.pkg https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.7%2B6/OpenJDK21U-jdk_#{temurin_arch}_mac_hotspot_21.0.7_6.pkg"
   not_if "pkgutil --pkg-info net.temurin.21.jdk"
 end
 
