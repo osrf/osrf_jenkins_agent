@@ -109,7 +109,7 @@ temurin_arch = case hw['architecture']
                end
 
 # Install java
-execute "Install temurin"
+execute "download temurin" do
   command "/usr/bin/curl -L -o /tmp/jdk21.pkg https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.7%2B6/OpenJDK21U-jdk_#{temurin_arch}_mac_hotspot_21.0.7_6.pkg"
   not_if "pkgutil --pkg-info net.temurin.21.jdk"
 end
