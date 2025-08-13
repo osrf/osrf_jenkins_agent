@@ -69,9 +69,13 @@ if node['osrfbuild']['agent']['auto_generate_labels']
   labels << hw['architecture']
 end
 
+# The Elliptic Curve Cryptography support in ARM64 build of 
+# OpenSSL 1.1.1m (cinc embedded version) seems to be broken, 
+# that's the reason why Curl is used instead
+# See: https://github.com/osrf/osrf_jenkins_agent/issues/53
+
 # Install xquartz
 execute "download xquartz" do
-  # Usage of curl because of #XXX
   command "/usr/bin/curl -L -o /tmp/xquartz.pkg https://github.com/XQuartz/XQuartz/releases/download/XQuartz-2.8.5/XQuartz-2.8.5.pkg"
   not_if "pkgutil --pkg-info org.xquartz.X11"
 end
