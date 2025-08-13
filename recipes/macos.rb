@@ -122,8 +122,9 @@ end
 # Fetch swarm client jar
 swarm_jar_path = "/Users/jenkins/swarm-client.jar"
 
-execute 'install swiarm client' do
+execute 'install swarm client' do
   command "/usr/bin/curl -L -o #{swarm_jar_path} #{node['osrfbuild']['agent']['jenkins_url']}/swarm/swarm-client.jar"
+  not_if { ::File.exist?(swarm_jar_path) }
 end
 
 file swarm_jar_path do
