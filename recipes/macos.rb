@@ -70,7 +70,7 @@ if node['osrfbuild']['agent']['auto_generate_labels']
 end
 
 # Install xquartz
-execute "download_xquartz" do
+execute "download xquartz" do
   # Usage of curl because of #XXX
   command "/usr/bin/curl -L -o /tmp/xquartz.pkg https://github.com/XQuartz/XQuartz/releases/download/XQuartz-2.8.5/XQuartz-2.8.5.pkg"
   not_if "pkgutil --pkg-info org.xquartz.X11"
@@ -122,8 +122,11 @@ end
 # Fetch swarm client jar
 swarm_jar_path = "/Users/jenkins/swarm-client.jar"
 
-remote_file swarm_jar_path do
-  source "#{node['osrfbuild']['agent']['jenkins_url']}/swarm/swarm-client.jar"
+execute 'install swiarm client' do
+  command "/usr/bin/curl -L -o #{swarm_jar_path} #{node['osrfbuild']['agent']['jenkins_url']}/swarm/swarm-client.jar"
+end
+
+file swarm_jar_path do
   owner "jenkins"
   group "staff"
 end
