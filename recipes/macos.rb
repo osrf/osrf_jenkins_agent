@@ -67,10 +67,11 @@ if node['osrfbuild']['agent']['auto_generate_labels']
   labels << "osx"
   labels << "osx_#{mac_version}"
   labels << hw['architecture']
+  labels << "#{hw['architecture']}_#{mac_version}"
 end
 
-# The Elliptic Curve Cryptography support in ARM64 build of 
-# OpenSSL 1.1.1m (cinc embedded version) seems to be broken, 
+# The Elliptic Curve Cryptography support in ARM64 build of
+# OpenSSL 1.1.1m (cinc embedded version) seems to be broken,
 # that's the reason why Curl is used instead
 # See: https://github.com/osrf/osrf_jenkins_agent/issues/53
 
