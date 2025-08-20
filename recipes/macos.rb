@@ -65,9 +65,9 @@ hw = node['hardware']
 description = "macOS #{hw['operating_system_version']} #{hw['current_processor_speed']} #{hw['cpu_type']} #{hw['physical_memory']} #{} Jenkins agent"
 if node['osrfbuild']['agent']['auto_generate_labels']
   labels << "osx"
-  labels << "osx_#{mac_version}"
+  labels << "osx_#{mac_version}" if hw['architecture'] == 'x86_64'
+  labels << "osx_#{hw['architecture']}_#{mac_version}" if hw['architecture'] == 'arm64'
   labels << hw['architecture']
-  labels << "#{hw['architecture']}_#{mac_version}"
 end
 
 # The Elliptic Curve Cryptography support in ARM64 build of
