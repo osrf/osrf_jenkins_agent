@@ -38,55 +38,6 @@
 
 # Run `brew doctor` to verify that homebrew has no complaints post-installation.
 
-
-# Install xquartz
-remote_file "/tmp/xquartz.pkg" do
-  source "https://github.com/XQuartz/XQuartz/releases/download/XQuartz-2.8.5/XQuartz-2.8.5.pkg"
-  not_if "pkgutil --pkg-info org.xquartz.X11"
-end
-
-execute "install xquartz" do
-  command "installer -pkg /tmp/xquartz.pkg -target /"
-  not_if "pkgutil --pkg-info org.xquartz.X11"
-end
-
-directory "/Users/jenkins/Library/LaunchAgents" do
-  owner "jenkins"
-  group "staff"
-  recursive true
-end
-
-launchd "org.xquartz.X11.plist" do
-  path "/Users/jenkins/Library/LaunchAgents/org.xquartz.X11.plist"
-  keep_alive true
-  run_at_load true
-  working_directory "/Users/jenkins"
-  process_type "Interactive"
-  program "/Applications/Utilities/XQuartz.app/Contents/MacOS/X11"
-  action [:create, :enable]
-end
-
-
-# Install java
-remote_file "/tmp/jdk21.pkg" do
-  source "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.7%2B6/OpenJDK21U-jdk_x64_mac_hotspot_21.0.7_6.pkg"
-  not_if "pkgutil --pkg-info net.temurin.21.jdk"
-end
-
-execute "install java" do
-  command "installer -pkg /tmp/jdk21.pkg -target /"
-  not_if "pkgutil --pkg-info net.temurin.21.jdk"
-end
-
-# Fetch swarm client jar
-swarm_jar_path = "/Users/jenkins/swarm-client.jar"
-
-remote_file swarm_jar_path do
-  source "#{node['osrfbuild']['agent']['jenkins_url']}/swarm/swarm-client.jar"
-  owner "jenkins"
-  group "staff"
-end
-
 # Map macOS platform version to version identifier
 mac_version = case node["platform_version"]
               when/\A11\./
@@ -114,15 +65,82 @@ hw = node['hardware']
 description = "macOS #{hw['operating_system_version']} #{hw['current_processor_speed']} #{hw['cpu_type']} #{hw['physical_memory']} #{} Jenkins agent"
 if node['osrfbuild']['agent']['auto_generate_labels']
   labels << "osx"
-  labels << "osx_#{mac_version}"
+  labels << "osx_#{mac_version}" if hw['architecture'] == 'x86_64'
+  labels << "osx_#{hw['architecture']}_#{mac_version}" if hw['architecture'] == 'arm64'
   labels << hw['architecture']
+end
+
+# The Elliptic Curve Cryptography support in ARM64 build of
+# OpenSSL 1.1.1m (cinc embedded version) seems to be broken,
+# that's the reason why Curl is used instead
+# See: https://github.com/osrf/osrf_jenkins_agent/issues/53
+
+# Install xquartz
+execute "download xquartz" do
+  command "/usr/bin/curl -L -o /tmp/xquartz.pkg https://github.com/XQuartz/XQuartz/releases/download/XQuartz-2.8.5/XQuartz-2.8.5.pkg"
+  not_if "pkgutil --pkg-info org.xquartz.X11"
+end
+
+execute "install xquartz" do
+  command "installer -pkg /tmp/xquartz.pkg -target /"
+  not_if "pkgutil --pkg-info org.xquartz.X11"
+end
+
+directory "/Users/jenkins/Library/LaunchAgents" do
+  owner "jenkins"
+  group "staff"
+  recursive true
+end
+
+launchd "org.xquartz.X11.plist" do
+  path "/Users/jenkins/Library/LaunchAgents/org.xquartz.X11.plist"
+  keep_alive true
+  run_at_load true
+  working_directory "/Users/jenkins"
+  process_type "Interactive"
+  program "/Applications/Utilities/XQuartz.app/Contents/MacOS/X11"
+  action [:create, :enable]
+end
+
+
+temurin_arch = case hw['architecture']
+               when /arm64/
+                 "aarch64"
+               when /x86_64/
+                 "x64"
+               else
+                 Chef::Fatal.log("macOS aarch #{hw['architecture']} is not supported by this cookbook")
+                 raise
+               end
+
+# Install java
+execute "download temurin" do
+  command "/usr/bin/curl -L -o /tmp/jdk21.pkg https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.7%2B6/OpenJDK21U-jdk_#{temurin_arch}_mac_hotspot_21.0.7_6.pkg"
+  not_if "pkgutil --pkg-info net.temurin.21.jdk"
+end
+
+execute "install java" do
+  command "installer -pkg /tmp/jdk21.pkg -target /"
+  not_if "pkgutil --pkg-info net.temurin.21.jdk"
+end
+
+# Fetch swarm client jar
+swarm_jar_path = "/Users/jenkins/swarm-client.jar"
+
+execute 'install swarm client' do
+  command "/usr/bin/curl -L -o #{swarm_jar_path} #{node['osrfbuild']['agent']['jenkins_url']}/swarm/swarm-client.jar"
+  not_if { ::File.exist?(swarm_jar_path) }
+end
+
+file swarm_jar_path do
+  owner "jenkins"
+  group "staff"
 end
 
 directory "/Users/jenkins/log" do
   owner "jenkins"
   group "staff"
 end
-
 
 # Create workspace inside jenkins home directory
 directory "/Users/jenkins/jenkins-agent" do
