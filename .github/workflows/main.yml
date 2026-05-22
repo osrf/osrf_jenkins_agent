@@ -31,9 +31,12 @@ jobs:
       - name: check out code
         uses: actions/checkout@v3.0.0
       - name: install chef
-        uses: actionshub/chef-install@main
+        uses: actionshub/chef-install@776a917c09d87c381d1d5342f83cd554223fa49c  # v3.0.1
+        with:
+          project: cinc-workstation
+          version: '25'
       - name: test-kitchen
-        uses: actionshub/test-kitchen@2.0.0
+        uses: actionshub/test-kitchen@6e6b61feb197118be2cbbb39795c6b089afe17b5  # v3.0.0
         with:
           suite: ${{ matrix.suite }}
           os: 'ubuntu-2404'
