@@ -4,6 +4,8 @@
 #
 # Copyright:: 2020, Open Source Robotics Foundation.
 #
+include_recipe 'osrf_jenkins_agent::security-patches'
+
 linux_username = node['osrfbuild']['agent']['linux_username']
 agent_homedir = "/home/#{linux_username}"
 
