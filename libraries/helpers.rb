@@ -19,14 +19,6 @@ module OSRFJenkinsAgent
     def has_nvidia_support?
       nvidia_devices.any?
     end
-
-    # Determines if an NVIDIA card GRID is detected on the system
-    # The model is the one in AWS nodes
-    #
-    # @return [Boolean]
-    def has_nvidia_grid_support?
-      nvidia_devices.any? { |dev| dev['device'] =~ /GRID/ }
-    end
   end
 end
 

@@ -58,34 +58,17 @@ if has_nvidia_support?
 
   Chef::Log.warn("There are multiple nvidia devices and I am only looking at the first!") if nvidia_devices.size != 1
 
-  nvidia_device = nvidia_devices.first['device']
+  package 'ubuntu-drivers-common' do
+    only_if { has_nvidia_support? }
+  end
 
-  nvidia_driver = case nvidia_device
-                  when /GTX 550/
-                    # Old optimus machine in OSRF office
-                    'nvidia-384'
-                  when /GRID K520/
-                    # AWS g2 instances
-                    'nvidia-384'
-                  when /Tesla M60/
-                    # AWS g3 instances
-                    'nvidia-driver-470'
-                  when /Tesla T4/
-                    # AWS g4dn instances
-                    'nvidia-driver-470'
-                  when /Device 2237/
-                    # AWS g5 instances
-                    'nvidia-driver-470'
-                  when nil
-                    # it doesn't really matter which driver we use
-                    # if there is no nvidia device but specify
-                    # one to avoid a warning.
-                    'nvidia-driver-470'
-                  else
-                    Chef::Log.warn("Untested GPU `#{nvidia_devices.first['device']}` being used. Assuming a functioning driver")
-                    'nvidia-driver-470'
-                  end
-  package nvidia_driver
+  execute 'ubuntu-drivers-install-nvidia-580-server' do
+    command 'ubuntu-drivers install nvidia:580-server'
+    only_if { has_nvidia_support? }
+    not_if "dpkg-query -W -f='${Status}' nvidia-driver-580-server 2>/dev/null | grep -q '^install ok installed$'"
+  end
+
+
   package 'mesa-utils'
 
   cookbook_file '/etc/modprobe.d/blacklist-nvidia-nouveau.conf' do
@@ -98,17 +81,9 @@ if has_nvidia_support?
     mode "0744"
   end
 
-  # Detecting AWS GRID cards that needs special configuration
-  cookbook_file '/etc/X11/xorg.conf' do
-    source 'xorg.conf.nvidia_aws'
-    mode "0744"
-    only_if { has_nvidia_grid_support? }
-  end
-  # Other NVIDIA cards use generic configuration
   cookbook_file '/etc/X11/xorg.conf' do
     source 'xorg.conf.nvidia'
     mode "0744"
-    not_if { has_nvidia_grid_support? }
   end
 end
 
