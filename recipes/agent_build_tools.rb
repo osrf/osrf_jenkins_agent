@@ -63,7 +63,7 @@ if has_nvidia_support?
   end
 
   execute 'ubuntu-drivers-install-nvidia-580-server' do
-    command 'ubuntu-drivers install nvidia:580-server'
+    command 'apt-get install -y --no-install-recommends nvidia-driver-580-server'
     only_if { has_nvidia_support? }
     not_if "dpkg-query -W -f='${Status}' nvidia-driver-580-server 2>/dev/null | grep -q '^install ok installed$'"
   end
