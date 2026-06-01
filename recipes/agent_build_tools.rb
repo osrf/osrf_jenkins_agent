@@ -94,7 +94,9 @@ ENV['DISPLAY'] = ':0'
 if has_nvidia_support?
   # lightdm seems to need unity-greeter and remove ubuntu-session to work out-of-the-box
   # see: https://github.com/osrf/osrf_jenkins_agent/issues/25
-  package 'unity-greeter'
+  package 'unity-greeter' do
+    options '--no-install-recommends'
+  end
   package 'ubuntu-session' do
     action :purge
   end
