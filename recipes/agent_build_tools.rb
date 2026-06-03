@@ -62,10 +62,15 @@ if has_nvidia_support?
     only_if { has_nvidia_support? }
   end
 
-  execute 'ubuntu-drivers-install-nvidia-580-server' do
-    command 'apt-get install -y --no-install-recommends nvidia-driver-580-server'
+  # Use the 535-server LTSB branch. Newer branches (>= 580) reference a
+  # kernel symbol (drm_fbdev_ttm_driver_fbdev_probe) that linux-image-aws
+  # 6.17 does not export, so nvidia-drm.ko fails to load and X falls back
+  # to software rendering. 535 is the latest branch whose module loads
+  # cleanly on the current Noble aws kernel.
+  execute 'install-nvidia-535-server' do
+    command 'apt-get install -y --no-install-recommends nvidia-driver-535-server'
     only_if { has_nvidia_support? }
-    not_if "dpkg-query -W -f='${Status}' nvidia-driver-580-server 2>/dev/null | grep -q '^install ok installed$'"
+    not_if "dpkg-query -W -f='${Status}' nvidia-driver-535-server 2>/dev/null | grep -q '^install ok installed$'"
   end
 
 
