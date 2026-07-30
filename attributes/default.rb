@@ -12,6 +12,13 @@ default['osrfbuild']['agent']['nodename'] = nil
 # If set to false, install just the Jenkins agent connection. Useful for
 # special machines like the package repositories.
 default['osrfbuild']['agent']['install_agent_build_setup'] = true
+# Packages that unattended-upgrades must not touch on a build agent. Entries are
+# regular expressions anchored at the start of the package name, so a prefix
+# such as 'nvidia-' does not cover 'libnvidia-'; list both.
+default['osrfbuild']['agent']['unattended_upgrades']['package_blacklist'] = %w[
+  nvidia-
+  libnvidia-
+]
 default['osrfbuild']['agent']['jenkins_url'] = "https://default_url.org"
 default['osrfbuild']['agent']['java_args'] = ''
 default['osrfbuild']['agent']['username'] = 'default_username'
