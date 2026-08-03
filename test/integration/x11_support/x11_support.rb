@@ -25,7 +25,7 @@ control 'nvidia-packages-on-hold' do
   # on agents without a GPU. Match any nvidia-driver-* so the check does not
   # silently turn into a no-op the next time the driver branch is bumped.
   only_if('an nvidia driver is installed') do
-    command("dpkg-query -W -f='${db:Status-Abbrev} ${Package}\\n' 'nvidia-driver-*' 2>/dev/null | grep -q '^ii'").exit_status.zero?
+    command("dpkg-query -W -f='${db:Status-Status} ${Package}\\n' 'nvidia-driver-*' 2>/dev/null | grep -q '^installed'").exit_status.zero?
   end
 
   describe command('apt-mark showhold') do
