@@ -17,3 +17,29 @@ control 'lightdm' do
       it { should be_installed }
   end
 end
+
+control 'nvidia-packages-on-hold' do
+  impact 'critical'
+  title 'nvidia packages are held so they are never upgraded behind the loaded nvidia.ko'
+  # Only meaningful once a driver is actually installed, which does not happen
+  # on agents without a GPU. Match any nvidia-driver-* so the check does not
+  # silently turn into a no-op the next time the driver branch is bumped.
+  only_if('an nvidia driver is installed') do
+    command("dpkg-query -W -f='${db:Status-Status} ${Package}\\n' 'nvidia-driver-*' 2>/dev/null | grep -q '^installed'").exit_status.zero?
+  end
+
+  describe command('apt-mark showhold') do
+    its('stdout') { should match /^nvidia-/ }
+    # The container stack is deliberately left out of the freeze: it detects
+    # the host driver at runtime and mounts the matching host libraries into
+    # containers, so it never skews against the loaded nvidia.ko and must keep
+    # receiving security updates.
+    its('stdout') { should_not match /container/ }
+  end
+
+  # Without this the exclusion checked above would also pass on a machine where
+  # the container stack simply is not installed.
+  describe package('nvidia-container-toolkit') do
+    it { should be_installed }
+  end
+end

@@ -1,0 +1,17 @@
+// Managed by Chef (osrf_jenkins_agent). Local changes will be overwritten.
+//
+// APT merges list values across apt.conf.d files, so this only adds to the
+// distribution defaults in 50unattended-upgrades instead of replacing them.
+//
+// Packages listed here break a running build agent when they are upgraded in
+// place. The NVIDIA driver is the motivating case: an upgrade replaces the
+// userspace libraries while the previously loaded nvidia.ko stays in memory,
+// and from that moment every GPU job on the agent fails at container start
+// with "failed to initialize NVML: Driver/library version mismatch" until the
+// machine is rebooted. Driver updates are done deliberately instead:
+// apt-mark unhold, converge, reboot.
+Unattended-Upgrade::Package-Blacklist {
+<% @blacklist.each do |pkg| -%>
+        "<%= pkg %>";
+<% end -%>
+};

@@ -42,6 +42,19 @@ end
   package pkg
 end
 
+# Keep unattended-upgrades away from packages that cannot be swapped under a
+# running agent. Dropped as a separate file in apt.conf.d so the distribution
+# 50unattended-upgrades keeps providing the rest of the policy.
+template '/etc/apt/apt.conf.d/51unattended-upgrades-osrf' do
+  source '51unattended-upgrades-osrf.erb'
+  mode '0644'
+  owner 'root'
+  group 'root'
+  variables(
+    blacklist: node['osrfbuild']['agent']['unattended_upgrades']['package_blacklist']
+  )
+end
+
 if has_nvidia_support?
   apt_repository "nvidia-container-toolkit" do
     uri 'https://nvidia.github.io/libnvidia-container/stable/deb/$(ARCH)'
@@ -67,12 +80,48 @@ if has_nvidia_support?
   # 6.17 does not export, so nvidia-drm.ko fails to load and X falls back
   # to software rendering. 535 is the latest branch whose module loads
   # cleanly on the current Noble aws kernel.
-  execute 'install-nvidia-535-server' do
-    command 'apt-get install -y --no-install-recommends nvidia-driver-535-server'
+  nvidia_driver_package = 'nvidia-driver-535-server'
+
+  execute "install-#{nvidia_driver_package}" do
+    command "apt-get install -y --no-install-recommends #{nvidia_driver_package}"
     only_if { has_nvidia_support? }
-    not_if "dpkg-query -W -f='${Status}' nvidia-driver-535-server 2>/dev/null | grep -q '^install ok installed$'"
+    not_if "dpkg-query -W -f='${db:Status-Status}' #{nvidia_driver_package} 2>/dev/null | grep -q '^installed$'"
   end
 
+  # Freeze the nvidia packages so they are never upgraded behind the nvidia.ko
+  # that is already loaded. When that happens the agent keeps looking healthy
+  # to lspci while every GPU job fails at container start with
+  #   failed to initialize NVML: Driver/library version mismatch
+  # and it stays that way until the machine is rebooted.
+  #
+  # Hold the installed packages rather than just the metapackage: on noble
+  # nvidia-driver-535-server is a transitional package whose dependency on
+  # nvidia-driver-580-server carries no version, so holding it alone would not
+  # keep the components still.
+  #
+  # This complements the unattended-upgrades blacklist above, which only covers
+  # the automatic path. Upgrading the driver is a deliberate operation:
+  # apt-mark unhold, converge, reboot.
+  #
+  # Shell snippet listing the installed nvidia packages that are not held yet.
+  # It is used both as the guard and as the input of the hold, so the resource
+  # only runs when there is something left to freeze. nvidia-container-toolkit
+  # and libnvidia-container* are excluded: they don't carry a copy of the
+  # driver (they mount the host driver into containers at runtime), so they
+  # are not part of the version-skew problem and should stay upgradable for
+  # security fixes instead of being frozen alongside the driver.
+  nvidia_packages_to_hold = <<~'CMD'.strip
+    held=$(apt-mark showhold);
+    dpkg-query -W -f='${db:Status-Abbrev} ${Package}\n' 'nvidia-*' 'libnvidia-*' 2>/dev/null |
+      awk '$1 ~ /^ii/ && $2 !~ /container/ { print $2 }' | sort -u |
+      while read -r pkg; do echo "$held" | grep -qx "$pkg" || echo "$pkg"; done
+  CMD
+
+  execute 'hold-nvidia-packages' do
+    command "#{nvidia_packages_to_hold} | xargs -r apt-mark hold"
+    only_if { has_nvidia_support? }
+    not_if %(test -z "$(#{nvidia_packages_to_hold})")
+  end
 
   package 'mesa-utils'
 
