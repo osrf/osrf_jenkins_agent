@@ -14,10 +14,14 @@ default['osrfbuild']['agent']['nodename'] = nil
 default['osrfbuild']['agent']['install_agent_build_setup'] = true
 # Packages that unattended-upgrades must not touch on a build agent. Entries are
 # regular expressions anchored at the start of the package name, so a prefix
-# such as 'nvidia-' does not cover 'libnvidia-'; list both.
+# such as 'nvidia-' does not cover 'libnvidia-'; list both. The (?!container)
+# lookahead excludes nvidia-container-toolkit/libnvidia-container*: they don't
+# ship a copy of the driver (they mount the host driver into containers at
+# runtime), so they carry no version-skew risk and should stay eligible for
+# security updates instead of being frozen alongside the driver.
 default['osrfbuild']['agent']['unattended_upgrades']['package_blacklist'] = %w[
-  nvidia-
-  libnvidia-
+  nvidia-(?!container)
+  libnvidia-(?!container)
 ]
 default['osrfbuild']['agent']['jenkins_url'] = "https://default_url.org"
 default['osrfbuild']['agent']['java_args'] = ''

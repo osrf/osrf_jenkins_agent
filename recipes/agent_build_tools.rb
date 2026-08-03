@@ -105,11 +105,15 @@ if has_nvidia_support?
   #
   # Shell snippet listing the installed nvidia packages that are not held yet.
   # It is used both as the guard and as the input of the hold, so the resource
-  # only runs when there is something left to freeze.
+  # only runs when there is something left to freeze. nvidia-container-toolkit
+  # and libnvidia-container* are excluded: they don't carry a copy of the
+  # driver (they mount the host driver into containers at runtime), so they
+  # are not part of the version-skew problem and should stay upgradable for
+  # security fixes instead of being frozen alongside the driver.
   nvidia_packages_to_hold = <<~'CMD'.strip
     held=$(apt-mark showhold);
     dpkg-query -W -f='${db:Status-Abbrev} ${Package}\n' 'nvidia-*' 'libnvidia-*' 2>/dev/null |
-      awk '$1 ~ /^ii/ { print $2 }' | sort -u |
+      awk '$1 ~ /^ii/ && $2 !~ /container/ { print $2 }' | sort -u |
       while read -r pkg; do echo "$held" | grep -qx "$pkg" || echo "$pkg"; done
   CMD
 
