@@ -85,7 +85,7 @@ if has_nvidia_support?
   execute "install-#{nvidia_driver_package}" do
     command "apt-get install -y --no-install-recommends #{nvidia_driver_package}"
     only_if { has_nvidia_support? }
-    not_if "dpkg-query -W -f='${Status}' #{nvidia_driver_package} 2>/dev/null | grep -q '^install ok installed$'"
+    not_if "dpkg-query -W -f='${db:Status-Status}' #{nvidia_driver_package} 2>/dev/null | grep -q '^installed$'"
   end
 
   # Freeze the nvidia packages so they are never upgraded behind the nvidia.ko
