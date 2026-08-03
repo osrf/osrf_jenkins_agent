@@ -123,7 +123,6 @@ if has_nvidia_support?
     not_if %(test -z "$(#{nvidia_packages_to_hold})")
   end
 
-
   package 'mesa-utils'
 
   cookbook_file '/etc/modprobe.d/blacklist-nvidia-nouveau.conf' do

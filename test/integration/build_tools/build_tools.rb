@@ -8,15 +8,19 @@ control 'unattended-upgrades-blacklist' do
   describe file('/etc/apt/apt.conf.d/51unattended-upgrades-osrf') do
     it { should exist }
     # 'nvidia-' does not cover 'libnvidia-': the entries are regexps anchored
-    # at the start of the package name
-    its('content') { should match /"nvidia-";/ }
-    its('content') { should match /"libnvidia-";/ }
+    # at the start of the package name, so both prefixes are listed. The
+    # (?!container) lookahead keeps nvidia-container-toolkit and
+    # libnvidia-container* out of the freeze: they mount the host driver into
+    # containers instead of shipping a copy of it, so they carry no
+    # version-skew risk and must stay eligible for security updates.
+    its('content') { should match /"nvidia-\(\?!container\)";/ }
+    its('content') { should match /"libnvidia-\(\?!container\)";/ }
   end
 
   # The distribution 50unattended-upgrades must keep providing the rest of the
   # policy, so check the merged value and not only our own file
   describe command('apt-config dump Unattended-Upgrade::Package-Blacklist') do
-    its('stdout') { should match /"nvidia-"/ }
-    its('stdout') { should match /"libnvidia-"/ }
+    its('stdout') { should match /"nvidia-\(\?!container\)"/ }
+    its('stdout') { should match /"libnvidia-\(\?!container\)"/ }
   end
 end

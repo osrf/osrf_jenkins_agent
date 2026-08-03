@@ -30,5 +30,16 @@ control 'nvidia-packages-on-hold' do
 
   describe command('apt-mark showhold') do
     its('stdout') { should match /^nvidia-/ }
+    # The container stack is deliberately left out of the freeze: it detects
+    # the host driver at runtime and mounts the matching host libraries into
+    # containers, so it never skews against the loaded nvidia.ko and must keep
+    # receiving security updates.
+    its('stdout') { should_not match /container/ }
+  end
+
+  # Without this the exclusion checked above would also pass on a machine where
+  # the container stack simply is not installed.
+  describe package('nvidia-container-toolkit') do
+    it { should be_installed }
   end
 end

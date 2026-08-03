@@ -13,12 +13,10 @@ default['osrfbuild']['agent']['nodename'] = nil
 # special machines like the package repositories.
 default['osrfbuild']['agent']['install_agent_build_setup'] = true
 # Packages that unattended-upgrades must not touch on a build agent. Entries are
-# regular expressions anchored at the start of the package name, so a prefix
-# such as 'nvidia-' does not cover 'libnvidia-'; list both. The (?!container)
-# lookahead excludes nvidia-container-toolkit/libnvidia-container*: they don't
+# regular expressions anchored at the start of the package name, 
+# Excluding nvidia-container-toolkit/libnvidia-container*: they don't
 # ship a copy of the driver (they mount the host driver into containers at
-# runtime), so they carry no version-skew risk and should stay eligible for
-# security updates instead of being frozen alongside the driver.
+# runtime).
 default['osrfbuild']['agent']['unattended_upgrades']['package_blacklist'] = %w[
   nvidia-(?!container)
   libnvidia-(?!container)
