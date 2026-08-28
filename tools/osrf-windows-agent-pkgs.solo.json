@@ -1,0 +1,5 @@
+{
+	"run_list": ["recipe[osrf_jenkins_agent::windows_agent_build_tools]"],
+	"override_attributes": {
+	}
+}
