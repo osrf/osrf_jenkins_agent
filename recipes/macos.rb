@@ -173,6 +173,17 @@ execute "disable screensaver for jenkins" do
   not_if "defaults -currentHost read com.apple.screensaver idleTime | grep -qx 0", user: "jenkins", environment: { "HOME" => "/Users/jenkins" }
 end
 
+# The agent used to run as a LaunchDaemon (system domain). Processes there
+# have no Aqua session and any test creating a window aborts in macOS 15.8
+# (SIGTRAP in SLSGetSessionUID via NSWindow). Remove it in favour of the
+# LaunchAgent below.
+launchd "legacy jenkins agent daemon" do
+  label "org.osrfoundation.build.jenkins-agent.plist"
+  path "/Library/LaunchDaemons/org.osrfoundation.build.jenkins-agent.plist"
+  action :delete
+  only_if { ::File.exist?("/Library/LaunchDaemons/org.osrfoundation.build.jenkins-agent.plist") }
+end
+
 swarm_password_path = "/Users/jenkins/.swarm-password"
 
 file swarm_password_path do
@@ -183,11 +194,21 @@ file swarm_password_path do
   sensitive true
 end
 
+# Run the agent as a LaunchAgent of the jenkins user so it lives inside the
+# Aqua session created by the autologin. It is placed in the jenkins home
+# and not in /Library/LaunchAgents so other users logging in (i.e:
+# administrator via VNC) do not spawn a second agent with the same name.
+jenkins_agent_plist = "/Users/jenkins/Library/LaunchAgents/org.osrfoundation.build.jenkins-agent.plist"
+
 launchd "org.osrfoundation.build.jenkins-agent.plist" do
-  path "/Library/LaunchDaemons/org.osrfoundation.build.jenkins-agent.plist"
+  path jenkins_agent_plist
+  type "agent"
+  owner "jenkins"
+  group "staff"
+  mode "0600"
+  limit_load_to_session_type "Aqua"
   keep_alive true
   run_at_load true
-  username "jenkins"
   working_directory "/Users/jenkins"
   standard_in_path "/dev/null"
   standard_out_path "/Users/jenkins/log/jenkins-agent.out.log"
@@ -210,5 +231,20 @@ launchd "org.osrfoundation.build.jenkins-agent.plist" do
     -e HOMEWBREW_FORCE_VENDOR_RUBY=1
     -e MAKE_JOBS=8
   ]
-  action [:create, :enable]
+  action :create
+  notifies :run, "execute[reload jenkins agent]", :immediately
+end
+
+# launchd loads the agent by itself on every jenkins login. Load it now into
+# the running jenkins GUI session, reloading it if the plist changed.
+execute "reload jenkins agent" do
+  command "launchctl bootout gui/$(id -u jenkins) #{jenkins_agent_plist} 2>/dev/null; launchctl bootstrap gui/$(id -u jenkins) #{jenkins_agent_plist}"
+  action :nothing
+  only_if "launchctl print gui/$(id -u jenkins) >/dev/null 2>&1"
+end
+
+execute "load jenkins agent" do
+  command "launchctl bootstrap gui/$(id -u jenkins) #{jenkins_agent_plist}"
+  not_if "launchctl print gui/$(id -u jenkins)/org.osrfoundation.build.jenkins-agent.plist >/dev/null 2>&1"
+  only_if "launchctl print gui/$(id -u jenkins) >/dev/null 2>&1"
 end
