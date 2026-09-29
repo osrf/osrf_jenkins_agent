@@ -13,7 +13,9 @@
 
 # Log in as the Jenkins user, leaving accessibility, siri, and apple ID sign in disabled during initial user setup.
 
-# Enable autologin for Jenkins from Login options, this is required so that xquartz is started on system boot.
+# Enable autologin for Jenkins from Login options (FileVault must be off), this
+# is required so that xquartz and the jenkins agent are started on system boot:
+# sudo sysadminctl -autologin set -userName jenkins -password -
 
 # Verify SSH and VNC remote access are enabled, which should already true for
 # our hosted machines.
@@ -54,6 +56,15 @@ mac_version = case node["platform_version"]
                 Chef::Fatal.log("macOS version #{node["platform_version"]} is not supported by this cookbook")
                 raise
               end
+
+# The jenkins agent runs inside the Aqua session of the jenkins user, without
+# autologin it will not start after a reboot. See instructions above.
+autologin_user = shell_out("defaults read /Library/Preferences/com.apple.loginwindow autoLoginUser").stdout.strip
+unless autologin_user == "jenkins"
+  Chef::Log.fatal("Autologin is not enabled for the jenkins user (autoLoginUser='#{autologin_user}'). " \
+                  "Run: sudo sysadminctl -autologin set -userName jenkins -password -")
+  raise
+end
 
 agent_name = "mac-#{node["hostname"]}.#{mac_version}"
 jenkins_agent_username = node['osrfbuild']['agent']['username']
