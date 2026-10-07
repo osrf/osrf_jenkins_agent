@@ -159,6 +159,18 @@ directory "/Users/jenkins/jenkins-agent" do
   group "staff"
 end
 
+# Keep the machine awake and boot it again after a power loss, the agent
+# needs the autologin session of the jenkins user to be always present.
+execute "disable sleep and enable autorestart" do
+  command "pmset -a sleep 0 displaysleep 0 disksleep 0 autorestart 1"
+  not_if "pmset -g | grep -qE '^ sleep +0' && pmset -g | grep -qE '^ displaysleep +0' && pmset -g | grep -qE '^ disksleep +0' && pmset -g | grep -qE '^ autorestart +1'"
+end
+
+execute "disable screensaver for jenkins" do
+  command "defaults -currentHost write com.apple.screensaver idleTime -int 0"
+  user "jenkins"
+  environment "HOME" => "/Users/jenkins"
+  not_if "defaults -currentHost read com.apple.screensaver idleTime | grep -qx 0", user: "jenkins", environment: { "HOME" => "/Users/jenkins" }
 # The agent used to run as a LaunchDaemon (system domain). Processes there
 # have no Aqua session and any test creating a window aborts in macOS 15.8
 # (SIGTRAP in SLSGetSessionUID via NSWindow). Remove it in favour of the
