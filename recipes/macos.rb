@@ -13,7 +13,9 @@
 
 # Log in as the Jenkins user, leaving accessibility, siri, and apple ID sign in disabled during initial user setup.
 
-# Enable autologin for Jenkins from Login options, this is required so that xquartz is started on system boot.
+# Enable autologin for Jenkins from Login options (FileVault must be off), this
+# is required so that xquartz and the jenkins agent are started on system boot:
+# sudo sysadminctl -autologin set -userName jenkins -password -
 
 # Verify SSH and VNC remote access are enabled, which should already true for
 # our hosted machines.
@@ -54,6 +56,15 @@ mac_version = case node["platform_version"]
                 Chef::Fatal.log("macOS version #{node["platform_version"]} is not supported by this cookbook")
                 raise
               end
+
+# The jenkins agent runs inside the Aqua session of the jenkins user, without
+# autologin it will not start after a reboot. See instructions above.
+autologin_user = shell_out("defaults read /Library/Preferences/com.apple.loginwindow autoLoginUser").stdout.strip
+unless autologin_user == "jenkins"
+  Chef::Log.fatal("Autologin is not enabled for the jenkins user (autoLoginUser='#{autologin_user}'). " \
+                  "Run: sudo sysadminctl -autologin set -userName jenkins -password -")
+  raise
+end
 
 agent_name = "mac-#{node["hostname"]}.#{mac_version}"
 jenkins_agent_username = node['osrfbuild']['agent']['username']
@@ -154,6 +165,18 @@ end
 # LaunchAgent below.
 launchd "legacy jenkins agent daemon" do
   label "org.osrfoundation.build.jenkins-agent.plist"
+# Create password file for jenkins agent
+password_file_path = "/Users/jenkins/jenkins-agent/.jenkins-password"
+
+file password_file_path do
+  content jenkins_agent_user['password']
+  owner "jenkins"
+  group "staff"
+  mode "0600"
+  sensitive true
+end
+
+launchd "org.osrfoundation.build.jenkins-agent.plist" do
   path "/Library/LaunchDaemons/org.osrfoundation.build.jenkins-agent.plist"
   action :delete
   only_if { ::File.exist?("/Library/LaunchDaemons/org.osrfoundation.build.jenkins-agent.plist") }
@@ -185,7 +208,7 @@ launchd "org.osrfoundation.build.jenkins-agent.plist" do
     -url #{node['osrfbuild']['agent']['jenkins_url']}
     -name #{agent_name}
     -username #{jenkins_agent_user['username']}
-    -password #{jenkins_agent_user['password']}
+    -passwordFile #{password_file_path}
     -description #{description}
     -mode exclusive
     -executors 1
