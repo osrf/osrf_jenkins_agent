@@ -160,6 +160,15 @@ execute "disable screensaver for jenkins" do
   user "jenkins"
   environment "HOME" => "/Users/jenkins"
   not_if "defaults -currentHost read com.apple.screensaver idleTime | grep -qx 0", user: "jenkins", environment: { "HOME" => "/Users/jenkins" }
+# Create password file for jenkins agent
+password_file_path = "/Users/jenkins/jenkins-agent/.jenkins-password"
+
+file password_file_path do
+  content jenkins_agent_user['password']
+  owner "jenkins"
+  group "staff"
+  mode "0600"
+  sensitive true
 end
 
 launchd "org.osrfoundation.build.jenkins-agent.plist" do
@@ -178,7 +187,7 @@ launchd "org.osrfoundation.build.jenkins-agent.plist" do
     -url #{node['osrfbuild']['agent']['jenkins_url']}
     -name #{agent_name}
     -username #{jenkins_agent_user['username']}
-    -password #{jenkins_agent_user['password']}
+    -passwordFile #{password_file_path}
     -description #{description}
     -mode exclusive
     -executors 1
