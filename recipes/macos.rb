@@ -171,12 +171,8 @@ execute "disable screensaver for jenkins" do
   user "jenkins"
   environment "HOME" => "/Users/jenkins"
   not_if "defaults -currentHost read com.apple.screensaver idleTime | grep -qx 0", user: "jenkins", environment: { "HOME" => "/Users/jenkins" }
-# The agent used to run as a LaunchDaemon (system domain). Processes there
-# have no Aqua session and any test creating a window aborts in macOS 15.8
-# (SIGTRAP in SLSGetSessionUID via NSWindow). Remove it in favour of the
-# LaunchAgent below.
-launchd "legacy jenkins agent daemon" do
-  label "org.osrfoundation.build.jenkins-agent.plist"
+end
+
 # Create password file for jenkins agent
 password_file_path = "/Users/jenkins/jenkins-agent/.jenkins-password"
 
@@ -188,6 +184,10 @@ file password_file_path do
   sensitive true
 end
 
+# The agent used to run as a LaunchDaemon (system domain). Processes there
+# have no Aqua session and any test creating a window aborts in macOS 15.8
+# (SIGTRAP in SLSGetSessionUID via NSWindow). Remove it in favour of the
+# LaunchAgent below.
 launchd "org.osrfoundation.build.jenkins-agent.plist" do
   path "/Library/LaunchDaemons/org.osrfoundation.build.jenkins-agent.plist"
   action :delete
