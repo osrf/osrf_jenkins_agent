@@ -13,7 +13,9 @@
 
 # Log in as the Jenkins user, leaving accessibility, siri, and apple ID sign in disabled during initial user setup.
 
-# Enable autologin for Jenkins from Login options, this is required so that xquartz is started on system boot.
+# Enable autologin for Jenkins from Login options (FileVault must be off), this
+# is required so that xquartz and the jenkins agent are started on system boot:
+# sudo sysadminctl -autologin set -userName jenkins -password -
 
 # Verify SSH and VNC remote access are enabled, which should already true for
 # our hosted machines.
@@ -54,6 +56,15 @@ mac_version = case node["platform_version"]
                 Chef::Fatal.log("macOS version #{node["platform_version"]} is not supported by this cookbook")
                 raise
               end
+
+# The jenkins agent runs inside the Aqua session of the jenkins user, without
+# autologin it will not start after a reboot. See instructions above.
+autologin_user = shell_out("defaults read /Library/Preferences/com.apple.loginwindow autoLoginUser").stdout.strip
+unless autologin_user == "jenkins"
+  Chef::Log.fatal("Autologin is not enabled for the jenkins user (autoLoginUser='#{autologin_user}'). " \
+                  "Run: sudo sysadminctl -autologin set -userName jenkins -password -")
+  raise
+end
 
 agent_name = "mac-#{node["hostname"]}.#{mac_version}"
 jenkins_agent_username = node['osrfbuild']['agent']['username']
@@ -160,6 +171,12 @@ execute "disable screensaver for jenkins" do
   user "jenkins"
   environment "HOME" => "/Users/jenkins"
   not_if "defaults -currentHost read com.apple.screensaver idleTime | grep -qx 0", user: "jenkins", environment: { "HOME" => "/Users/jenkins" }
+# The agent used to run as a LaunchDaemon (system domain). Processes there
+# have no Aqua session and any test creating a window aborts in macOS 15.8
+# (SIGTRAP in SLSGetSessionUID via NSWindow). Remove it in favour of the
+# LaunchAgent below.
+launchd "legacy jenkins agent daemon" do
+  label "org.osrfoundation.build.jenkins-agent.plist"
 # Create password file for jenkins agent
 password_file_path = "/Users/jenkins/jenkins-agent/.jenkins-password"
 
@@ -173,9 +190,25 @@ end
 
 launchd "org.osrfoundation.build.jenkins-agent.plist" do
   path "/Library/LaunchDaemons/org.osrfoundation.build.jenkins-agent.plist"
+  action :delete
+  only_if { ::File.exist?("/Library/LaunchDaemons/org.osrfoundation.build.jenkins-agent.plist") }
+end
+
+# Run the agent as a LaunchAgent of the jenkins user so it lives inside the
+# Aqua session created by the autologin. It is placed in the jenkins home
+# and not in /Library/LaunchAgents so other users logging in (i.e:
+# administrator via VNC) do not spawn a second agent with the same name.
+jenkins_agent_plist = "/Users/jenkins/Library/LaunchAgents/org.osrfoundation.build.jenkins-agent.plist"
+
+launchd "org.osrfoundation.build.jenkins-agent.plist" do
+  path jenkins_agent_plist
+  type "agent"
+  owner "jenkins"
+  group "staff"
+  mode "0600"
+  limit_load_to_session_type "Aqua"
   keep_alive true
   run_at_load true
-  username "jenkins"
   working_directory "/Users/jenkins"
   standard_in_path "/dev/null"
   standard_out_path "/Users/jenkins/log/jenkins-agent.out.log"
@@ -198,5 +231,20 @@ launchd "org.osrfoundation.build.jenkins-agent.plist" do
     -e HOMEWBREW_FORCE_VENDOR_RUBY=1
     -e MAKE_JOBS=8
   ]
-  action [:create, :enable]
+  action :create
+  notifies :run, "execute[reload jenkins agent]", :immediately
+end
+
+# launchd loads the agent by itself on every jenkins login. Load it now into
+# the running jenkins GUI session, reloading it if the plist changed.
+execute "reload jenkins agent" do
+  command "launchctl bootout gui/$(id -u jenkins) #{jenkins_agent_plist} 2>/dev/null; launchctl bootstrap gui/$(id -u jenkins) #{jenkins_agent_plist}"
+  action :nothing
+  only_if "launchctl print gui/$(id -u jenkins) >/dev/null 2>&1"
+end
+
+execute "load jenkins agent" do
+  command "launchctl bootstrap gui/$(id -u jenkins) #{jenkins_agent_plist}"
+  not_if "launchctl print gui/$(id -u jenkins)/org.osrfoundation.build.jenkins-agent.plist >/dev/null 2>&1"
+  only_if "launchctl print gui/$(id -u jenkins) >/dev/null 2>&1"
 end
