@@ -152,7 +152,7 @@ end
 # needs the autologin session of the jenkins user to be always present.
 execute "disable sleep and enable autorestart" do
   command "pmset -a sleep 0 displaysleep 0 disksleep 0 autorestart 1"
-  not_if "pmset -g | grep -qE '^ sleep +0' && pmset -g | grep -qE '^ displaysleep +0' && pmset -g | grep -qE '^ autorestart +1'"
+  not_if "pmset -g | grep -qE '^ sleep +0' && pmset -g | grep -qE '^ displaysleep +0' && pmset -g | grep -qE '^ disksleep +0' && pmset -g | grep -qE '^ autorestart +1'"
 end
 
 execute "disable screensaver for jenkins" do
