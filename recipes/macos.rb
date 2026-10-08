@@ -52,18 +52,18 @@ mac_version = case node["platform_version"]
                 "sonoma"
               when /\A15\./
                 "sequoia"
+              when /\A26\./
+                "tahoe"
               else
-                Chef::Fatal.log("macOS version #{node["platform_version"]} is not supported by this cookbook")
-                raise
+                raise "macOS version #{node["platform_version"]} is not supported by this cookbook"
               end
 
 # The jenkins agent runs inside the Aqua session of the jenkins user, without
 # autologin it will not start after a reboot. See instructions above.
 autologin_user = shell_out("defaults read /Library/Preferences/com.apple.loginwindow autoLoginUser").stdout.strip
 unless autologin_user == "jenkins"
-  Chef::Log.fatal("Autologin is not enabled for the jenkins user (autoLoginUser='#{autologin_user}'). " \
-                  "Run: sudo sysadminctl -autologin set -userName jenkins -password -")
-  raise
+  raise "Autologin is not enabled for the jenkins user (autoLoginUser='#{autologin_user}'). " \
+        "Run: sudo sysadminctl -autologin set -userName jenkins -password -"
 end
 
 agent_name = "mac-#{node["hostname"]}.#{mac_version}"
@@ -120,8 +120,7 @@ temurin_arch = case hw['architecture']
                when /x86_64/
                  "x64"
                else
-                 Chef::Fatal.log("macOS aarch #{hw['architecture']} is not supported by this cookbook")
-                 raise
+                 raise "macOS aarch #{hw['architecture']} is not supported by this cookbook"
                end
 
 # Install java
