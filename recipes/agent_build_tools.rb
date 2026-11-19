@@ -157,12 +157,17 @@ if has_nvidia_support?
 end
 
 
+# lightdm starts an X server on the machine console. Test Kitchen runs in an
+# unprivileged container with no access to the host devices, so X can not
+# start there and lightdm exits. Only enable it in the test environment.
+start_lightdm = !['test'].include?(node.chef_environment)
+
 package "lightdm"
 cookbook_file "/etc/lightdm/xhost.sh" do
   source "lightdm/xhost.sh"
   mode "0744"
   notifies :restart, "service[accounts-daemon]", :delayed # Needs a restart before lightdm
-  notifies :restart, "service[lightdm]", :delayed
+  notifies :restart, "service[lightdm]", :delayed if start_lightdm
 end
 cookbook_file "/etc/lightdm/lightdm.conf" do
   source "lightdm/lightdm.conf"
@@ -200,7 +205,7 @@ execute 'set-lightdm-display-manager-etc' do
   not_if 'grep lightdm /etc/X11/default-display-manager'
 end
 service "lightdm" do
-  action [:start, :enable]
+  action start_lightdm ? [:start, :enable] : :enable
 end
 
 

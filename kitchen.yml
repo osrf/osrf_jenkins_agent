@@ -3,7 +3,22 @@ driver:
   name: dokken
   chef_version: <%= ENV['CHEF_VERSION'] || 'current' %>
   use_sudo: false
-  privileged: true
+  # Never privileged: a privileged container gets the host /dev, so the
+  # lightdm/Xorg started by agent_build_tools takes over the host VT, screen
+  # and keyboard. systemd as PID 1 only needs a writable cgroup and a
+  # tmpfs /run, which it cannot mount itself. writable-cgroups only exposes
+  # the container's own subtree with the private cgroup namespace that
+  # Docker uses by default on cgroup v2, so keep cgroupns_host unset.
+  # NET_ADMIN lets the docker.io installed by agent_build_tools set up its
+  # iptables rules, inside the container network namespace only.
+  privileged: false
+  cap_add:
+    - NET_ADMIN
+  security_opt:
+    - writable-cgroups=true
+  tmpfs:
+    - /run
+    - /run/lock
   env:
     - CHEF_LICENSE=accept
 
