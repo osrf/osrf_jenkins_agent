@@ -1,0 +1,94 @@
+#!/bin/bash
+# Mount the instance store of an AWS build agent at /srv/ccache, where the
+# Linux CI builds of release-tools keep the compiler cache that they share.
+#
+# osrf-ccache-volume.service runs it at every boot. The instance store loses
+# its data when the instance stops, so the device is formatted whenever it
+# holds no file system. After a reboot the data is still there: the file
+# system is checked and kept. Agents without an instance store are left as
+# they are, and release-tools builds there without the shared cache.
+#
+# Usage: osrf-ccache-volume <user that owns the cache>
+set -euo pipefail
+
+CACHE_USER=${1:?usage: osrf-ccache-volume <user that owns the cache>}
+MOUNT_DIR=/srv/ccache
+LABEL=osrf-ccache
+# Model of the instance store volumes. EBS volumes report another one,
+# "Amazon Elastic Block Store".
+MODEL='Amazon EC2 NVMe Instance Storage'
+
+log() { echo "osrf-ccache-volume: $*"; }
+
+# A container can see the disks of its host: never format from one
+if [[ -f /.dockerenv || -f /run/.containerenv ]] \
+   || systemd-detect-virt --quiet --container 2> /dev/null; then
+  log 'running in a container, nothing to do'
+  exit 0
+fi
+
+if mountpoint -q "${MOUNT_DIR}"; then
+  log "${MOUNT_DIR} is already a mount point, nothing to do"
+  exit 0
+fi
+
+udevadm settle --timeout=30 || true
+
+devices=()
+for model_file in /sys/block/nvme*/device/model; do
+  [[ -r ${model_file} ]] || continue
+  # sysfs pads the model with spaces
+  read -r model < "${model_file}" || true
+  [[ ${model} == "${MODEL}" ]] || continue
+  name=${model_file#/sys/block/}
+  devices+=("/dev/${name%%/*}")
+done
+
+if [[ ${#devices[@]} -eq 0 ]]; then
+  log 'no instance store on this agent, nothing to do'
+  exit 0
+fi
+device=${devices[0]}
+if [[ ${#devices[@]} -gt 1 ]]; then
+  log "${#devices[@]} instance store volumes, using ${device} only"
+fi
+name=${device#/dev/}
+
+# Leave alone a disk that something else uses: partitions, holders (LVM,
+# RAID), mounted or swap
+if compgen -G "/sys/block/${name}/${name}*" > /dev/null \
+   || [[ -n $(ls -A "/sys/block/${name}/holders") ]] \
+   || findmnt -rn -S "${device}" > /dev/null \
+   || swapon --noheadings --show=NAME | grep -qx "${device}"; then
+  log "${device} is in use, not touching it"
+  exit 0
+fi
+
+fs_type=$(blkid -p -o value -s TYPE "${device}" || true)
+fs_label=$(blkid -p -o value -s LABEL "${device}" || true)
+format=false
+if [[ -z ${fs_type} ]]; then
+  format=true
+elif [[ ${fs_type} == ext4 && ${fs_label} == "${LABEL}" ]]; then
+  # e2fsck exits with 0 or 1 for a sound file system, with 4 or more if not
+  rc=0
+  e2fsck -p "${device}" || rc=$?
+  if [[ ${rc} -ge 4 ]]; then
+    log "e2fsck failed on ${device} (exit ${rc}), formatting it again"
+    format=true
+  fi
+else
+  log "${device} holds a file system that is not ours (${fs_type} '${fs_label}'), not touching it"
+  exit 0
+fi
+
+if ${format}; then
+  log "formatting ${device}"
+  mkfs.ext4 -q -F -L "${LABEL}" -m 0 "${device}"
+fi
+
+install -d -m 0755 "${MOUNT_DIR}"
+mount -o noatime,nodev,nosuid,noexec "${device}" "${MOUNT_DIR}"
+chown "${CACHE_USER}:" "${MOUNT_DIR}"
+chmod 0755 "${MOUNT_DIR}"
+log "${device} mounted at ${MOUNT_DIR}, $(df -h --output=size "${MOUNT_DIR}" | tail -n 1 | tr -d ' ')"

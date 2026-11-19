@@ -24,3 +24,23 @@ control 'unattended-upgrades-blacklist' do
     its('stdout') { should match /"libnvidia-\(\?!container\)"/ }
   end
 end
+
+control 'ccache-instance-store' do
+  impact 'medium'
+  title 'The instance store is mounted at /srv/ccache by a unit at boot, never from fstab'
+  describe file('/usr/local/sbin/osrf-ccache-volume') do
+    it { should be_executable }
+  end
+  describe service('osrf-ccache-volume') do
+    it { should be_enabled }
+  end
+  # The test containers have no instance store, and from a container the
+  # script must not touch the disks of the host
+  describe command('/usr/local/sbin/osrf-ccache-volume default_linux_username') do
+    its('exit_status') { should eq 0 }
+    its('stdout') { should match /nothing to do/ }
+  end
+  describe file('/etc/fstab') do
+    its('content') { should_not match %r{/srv/ccache} }
+  end
+end
