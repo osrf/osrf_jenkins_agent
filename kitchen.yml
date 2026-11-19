@@ -5,18 +5,20 @@ driver:
   use_sudo: false
   # Never privileged: a privileged container gets the host /dev, so the
   # lightdm/Xorg started by agent_build_tools takes over the host VT, screen
-  # and keyboard. systemd as PID 1 only needs SYS_ADMIN, a writable cgroup
-  # (see pid_one_command) and no AppArmor confinement, since docker-default
-  # denies the mount(2) calls systemd uses to sandbox generators and units.
+  # and keyboard. systemd as PID 1 only needs a writable cgroup and a
+  # tmpfs /run, which it cannot mount itself. writable-cgroups only exposes
+  # the container's own subtree with the private cgroup namespace that
+  # Docker uses by default on cgroup v2, so keep cgroupns_host unset.
   # NET_ADMIN lets the docker.io installed by agent_build_tools set up its
   # iptables rules, inside the container network namespace only.
-  # Device access stays blocked by the docker device cgroup.
   privileged: false
   cap_add:
-    - SYS_ADMIN
     - NET_ADMIN
   security_opt:
-    - apparmor=unconfined
+    - writable-cgroups=true
+  tmpfs:
+    - /run
+    - /run/lock
   env:
     - CHEF_LICENSE=accept
 
@@ -34,15 +36,7 @@ platforms:
   - name: ubuntu-24.04
     driver:
       image: dokken/ubuntu-24.04
-      # Docker mounts the cgroup read-only unless privileged. In a private
-      # cgroup namespace the mount only shows the container's own subtree,
-      # so remount it read-write for systemd. Refuse to run otherwise: with
-      # the host namespace this would expose the host cgroup tree.
-      pid_one_command: >-
-        sh -c 'grep -qx 0::/ /proc/self/cgroup
-        || { echo "kitchen: needs a private cgroup namespace (cgroup v2)" >&2;
-        exit 1; };
-        mount -o remount,rw /sys/fs/cgroup && exec /bin/systemd'
+      pid_one_command: /bin/systemd
       intermediate_instructions:
         - RUN /usr/bin/apt-get update
         - RUN /usr/bin/apt-get install -y pciutils
