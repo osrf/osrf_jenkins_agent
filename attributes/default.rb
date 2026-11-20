@@ -12,6 +12,10 @@ default['osrfbuild']['agent']['nodename'] = nil
 # If set to false, install just the Jenkins agent connection. Useful for
 # special machines like the package repositories.
 default['osrfbuild']['agent']['install_agent_build_setup'] = true
+# If set to true (and install_agent_build_setup is), mount the AWS instance
+# store at /srv/ccache at every boot for the compiler cache of the Linux CI
+# builds. Agents without an instance store are left as they are.
+default['osrfbuild']['agent']['ccache_instance_store'] = true
 # Packages that unattended-upgrades must not touch on a build agent. Entries are
 # regular expressions anchored at the start of the package name, 
 # Excluding nvidia-container-toolkit/libnvidia-container*: they don't
