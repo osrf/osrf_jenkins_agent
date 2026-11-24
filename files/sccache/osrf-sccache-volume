@@ -1,24 +1,25 @@
 #!/bin/bash
-# Mount the instance store of an AWS build agent at /srv/ccache, where the
-# Linux CI builds of release-tools keep the compiler cache that they share.
+# Mount the instance store of an AWS build agent at /srv/sccache, where the
+# Linux CI builds of release-tools keep the compiler cache (sccache) that
+# they share.
 #
-# osrf-ccache-volume.service runs it at every boot. The instance store loses
+# osrf-sccache-volume.service runs it at every boot. The instance store loses
 # its data when the instance stops, so the device is formatted whenever it
 # holds no file system. After a reboot the data is still there: the file
 # system is checked and kept. Agents without an instance store are left as
 # they are, and release-tools builds there without the shared cache.
 #
-# Usage: osrf-ccache-volume <user that owns the cache>
+# Usage: osrf-sccache-volume <user that owns the cache>
 set -euo pipefail
 
-CACHE_USER=${1:?usage: osrf-ccache-volume <user that owns the cache>}
-MOUNT_DIR=/srv/ccache
-LABEL=osrf-ccache
+CACHE_USER=${1:?usage: osrf-sccache-volume <user that owns the cache>}
+MOUNT_DIR=/srv/sccache
+LABEL=osrf-sccache
 # Model of the instance store volumes. EBS volumes report another one,
 # "Amazon Elastic Block Store".
 MODEL='Amazon EC2 NVMe Instance Storage'
 
-log() { echo "osrf-ccache-volume: $*"; }
+log() { echo "osrf-sccache-volume: $*"; }
 
 # A container can see the disks of its host: never format from one
 if [[ -f /.dockerenv || -f /run/.containerenv ]] \

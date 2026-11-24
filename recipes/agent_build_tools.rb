@@ -218,5 +218,4 @@ service "squid-deb-proxy" do
   action [:start, :enable]
 end
 
-
-include_recipe 'osrf_jenkins_agent::ccache_instance_store' if node['osrfbuild']['agent']['ccache_instance_store']
+include_recipe 'osrf_jenkins_agent::sccache' if node['osrfbuild']['agent']['sccache']['enabled']
