@@ -17,12 +17,14 @@ default['osrfbuild']['agent']['install_agent_build_setup'] = true
 # mount the AWS instance store at /srv/sccache at every boot. Agents without an
 # instance store get the binary only.
 default['osrfbuild']['agent']['sccache']['enabled'] = true
-default['osrfbuild']['agent']['sccache']['version'] = '0.19.0'
+# 0.20.0 or newer: older releases update the file times of every entry they
+# hit, so a read-only mount of the cache gets no hits (mozilla/sccache#2901).
+default['osrfbuild']['agent']['sccache']['version'] = '0.20.1'
 # sha256 of the sccache-v<version>-<arch>-unknown-linux-musl.tar.gz release
 # asset, per node['kernel']['machine']. Other architectures get no sccache.
 default['osrfbuild']['agent']['sccache']['checksums'] = {
-  'x86_64' => 'aa73c7270c997894038c0d8f0d297865f57569e1687883322bc431713d4bb9dd',
-  'aarch64' => '3e47fc4a71b1ddd1b4294a0de9d34498922fdf41e3cd0bda5df3954e3d6deb9d',
+  'x86_64' => 'c9f6c5a3ae84d9da0956b28c357a365827bda33f3383647fc0b67484c74a5ea9',
+  'aarch64' => '505324daad5fcbb1a3cab5d57d26ef42baf4d10b236df7de93a008196f1f2230',
 }
 # Packages that unattended-upgrades must not touch on a build agent. Entries are
 # regular expressions anchored at the start of the package name, 
