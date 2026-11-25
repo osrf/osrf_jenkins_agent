@@ -1,0 +1,50 @@
+To solve: microsoft/vcpkg#30546.
+
+From 1fb05211dbf8af15745b44d9d760e07ccf2797d1 Mon Sep 17 00:00:00 2001
+From: Mengna-Li <543250287@qq.com>
+Date: Thu, 30 Mar 2023 10:15:17 +0000
+Subject: [PATCH] update runtime version
+
+---
+ scripts/cmake/vcpkg_acquire_msys.cmake | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/scripts/cmake/vcpkg_acquire_msys.cmake b/scripts/cmake/vcpkg_acquire_msys.cmake
+index 8b0b3d931d74e..67441df14b549 100644
+--- a/scripts/cmake/vcpkg_acquire_msys.cmake
++++ b/scripts/cmake/vcpkg_acquire_msys.cmake
+@@ -343,8 +343,8 @@ function(vcpkg_acquire_msys out_msys_root)
+         DEPS msys2-runtime
+     )
+     z_vcpkg_acquire_msys_declare_package(
+-        URL "https://repo.msys2.org/msys/x86_64/msys2-runtime-3.2.0-8-x86_64.pkg.tar.zst"
+-        SHA512 fdd86f4ffa6e274d6fef1676a4987971b1f2e1ec556eee947adcb4240dc562180afc4914c2bdecba284012967d3d3cf4d1a392f798a3b32a3668d6678a86e8d3
++        URL "https://repo.msys2.org/msys/x86_64/msys2-runtime-3.4.6-1-x86_64.pkg.tar.zst"
++        SHA512 fbdcf2572d242b14ef3b39f29a6119ee58705bad651c9da48ffd11e80637e8d767d20ed5d562f67d92eecd01f7fc3bc351af9d4f84fb9b321d2a9aff858b3619
+     )
+     z_vcpkg_acquire_msys_declare_package(
+         URL "https://repo.msys2.org/msys/x86_64/which-2.21-4-x86_64.pkg.tar.zst"
+From 0912a1a3cc5ebe16181d39f302ddab258f5b757d Mon Sep 17 00:00:00 2001
+From: Jonliu1993 <13720414433@163.com>
+Date: Fri, 13 Jan 2023 15:34:32 +0800
+Subject: [PATCH 1/2] [vcpkg] update msys-libiconv versio
+
+---
+ scripts/cmake/vcpkg_acquire_msys.cmake | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/scripts/cmake/vcpkg_acquire_msys.cmake b/scripts/cmake/vcpkg_acquire_msys.cmake
+index 98effb4f9ef32..5cfdd1dc67960 100644
+--- a/scripts/cmake/vcpkg_acquire_msys.cmake
++++ b/scripts/cmake/vcpkg_acquire_msys.cmake
+@@ -184,8 +184,8 @@ function(vcpkg_acquire_msys out_msys_root)
+         DEPS libiconv libintl
+     )
+     z_vcpkg_acquire_msys_declare_package(
+-        URL "https://repo.msys2.org/msys/x86_64/libtool-2.4.6-9-x86_64.pkg.tar.xz"
+-        SHA512 b309799e5a9d248ef66eaf11a0bd21bf4e8b9bd5c677c627ec83fa760ce9f0b54ddf1b62cbb436e641fbbde71e3b61cb71ff541d866f8ca7717a3a0dbeb00ebf
++        URL "https://repo.msys2.org/msys/x86_64/libtool-2.4.6-14-x86_64.pkg.tar.zst"
++        SHA512 ba983ed9c2996d06b0d21b8fab9505267115f2106341f130e92d6b66dad87b0f0e82707daf0b676a28966bfaa24f6c41b6eef9e1f9bf985611471024f2b0ac97
+         DEPS grep sed coreutils file findutils
+     )
+     z_vcpkg_acquire_msys_declare_package(
