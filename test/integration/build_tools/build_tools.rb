@@ -24,3 +24,27 @@ control 'unattended-upgrades-blacklist' do
     its('stdout') { should match /"libnvidia-\(\?!container\)"/ }
   end
 end
+
+control 'sccache' do
+  impact 'medium'
+  title 'sccache is installed, and a unit mounts the instance store at /srv/sccache at boot, never fstab'
+  describe command('/usr/local/bin/sccache --version') do
+    its('exit_status') { should eq 0 }
+    its('stdout') { should match /\Asccache \d+\.\d+\.\d+$/ }
+  end
+  describe file('/usr/local/sbin/osrf-sccache-volume') do
+    it { should be_executable }
+  end
+  describe service('osrf-sccache-volume') do
+    it { should be_enabled }
+  end
+  # The test containers have no instance store, and from a container the
+  # script must not touch the disks of the host
+  describe command('/usr/local/sbin/osrf-sccache-volume default_linux_username') do
+    its('exit_status') { should eq 0 }
+    its('stdout') { should match /nothing to do/ }
+  end
+  describe file('/etc/fstab') do
+    its('content') { should_not match %r{/srv/sccache} }
+  end
+end

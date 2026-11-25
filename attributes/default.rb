@@ -12,6 +12,20 @@ default['osrfbuild']['agent']['nodename'] = nil
 # If set to false, install just the Jenkins agent connection. Useful for
 # special machines like the package repositories.
 default['osrfbuild']['agent']['install_agent_build_setup'] = true
+# Compiler cache of the Linux CI builds. If set to true (and
+# install_agent_build_setup is), install sccache at /usr/local/bin/sccache and
+# mount the AWS instance store at /srv/sccache at every boot. Agents without an
+# instance store get the binary only.
+default['osrfbuild']['agent']['sccache']['enabled'] = true
+# 0.20.0 or newer: older releases update the file times of every entry they
+# hit, so a read-only mount of the cache gets no hits (mozilla/sccache#2901).
+default['osrfbuild']['agent']['sccache']['version'] = '0.20.1'
+# sha256 of the sccache-v<version>-<arch>-unknown-linux-musl.tar.gz release
+# asset, per node['kernel']['machine']. Other architectures get no sccache.
+default['osrfbuild']['agent']['sccache']['checksums'] = {
+  'x86_64' => 'c9f6c5a3ae84d9da0956b28c357a365827bda33f3383647fc0b67484c74a5ea9',
+  'aarch64' => '505324daad5fcbb1a3cab5d57d26ef42baf4d10b236df7de93a008196f1f2230',
+}
 # Packages that unattended-upgrades must not touch on a build agent. Entries are
 # regular expressions anchored at the start of the package name, 
 # Excluding nvidia-container-toolkit/libnvidia-container*: they don't
